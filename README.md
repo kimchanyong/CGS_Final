@@ -23,5 +23,15 @@ Download & unzip:
 
 
 ## 🌿 Branch Strategy
-- main: stable version
-- 각자 브랜치 생성해서 작업하기
+- 주의사항: 각자 브랜치 생성해서 자기 브랜치에서만 작업하기
+
+<초기세팅>
+"git bash 실행"
+git clone https://github.com/kimchanyong/CGS_Final.git
+git checkout -b (브랜치이름)
+git push -u origin (브랜치이름)
+
+<작업이 끝나면>
+git add .
+git commit -m "(한줄요약)"
+git push
