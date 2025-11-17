@@ -126,7 +126,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CGS_Final.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="collision.cpp" />
+    <ClCompile Include="maze_loader.cpp" />
+    <ClCompile Include="maze_renderer.cpp" />
+    <ClCompile Include="player.cpp" />
+    <ClCompile Include="util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="collision.h" />
+    <ClInclude Include="maze.h" />
+    <ClInclude Include="player.h" />
+    <ClInclude Include="util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
