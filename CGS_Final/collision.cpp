@@ -5,7 +5,6 @@
 AABB wallBoxes[MAX_MAZE_SIZE][MAX_MAZE_SIZE];
 
 void buildCollisionMap() {
-    // 벽 충돌 박스 크기 = CELL_SIZE
     float wallSize = CELL_SIZE;
 
     for (int i = 0; i < MAZE_ROWS; i++) {

@@ -15,17 +15,18 @@ int lastMouseY = 360;
 bool firstMouse = true;
 
 void initPlayer() {
-    player.x = 0.0f;
+    // 미로에서 시작 위치 찾기 (타일 -1)
+    getStartPosition(player.x, player.z);
+
     player.y = PLAYER_HEIGHT / 2.0f;
-    player.z = 0.0f;
     player.angleY = 0.0f;
-    player.angleX = 0.0f;  // 상하 각도 초기화
+    player.angleX = 0.0f;
     player.speed = MOVE_SPEED;
     player.itemsCollected = 0;
     player.totalItems = 0;
     player.reachedGoal = false;
 
-    std::cout << "Player initialized at (" << player.x << ", " << player.z << ")" << std::endl;
+    std::cout << "Player initialized successfully" << std::endl;
 }
 
 void updatePlayer(float deltaTime) {
@@ -34,21 +35,18 @@ void updatePlayer(float deltaTime) {
     float moveX = 0.0f;
     float moveZ = 0.0f;
 
-    // 키 상태에 따른 이동 방향 계산
-    // W/S: 앞/뒤 (카메라 바라보는 방향 기준)
+    // 키 상태에 따른 이동 방향
     if (keyStates['w'] || keyStates['W']) {
-        moveZ -= 1.0f;  // 전진
+        moveZ -= 1.0f;
     }
     if (keyStates['s'] || keyStates['S']) {
-        moveZ += 1.0f;  // 후진
+        moveZ += 1.0f;
     }
-
-    // A/D: 좌/우 (카메라 기준 좌우 이동)
     if (keyStates['a'] || keyStates['A']) {
-        moveX -= 1.0f;  // 왼쪽
+        moveX -= 1.0f;
     }
     if (keyStates['d'] || keyStates['D']) {
-        moveX += 1.0f;  // 오른쪽
+        moveX += 1.0f;
     }
 
     // 대각선 이동 정규화
@@ -59,7 +57,6 @@ void updatePlayer(float deltaTime) {
     float cosAngle = std::cos(angleRad);
     float sinAngle = std::sin(angleRad);
 
-    // 회전 행렬 적용
     float worldMoveX = moveX * cosAngle - moveZ * sinAngle;
     float worldMoveZ = moveX * sinAngle + moveZ * cosAngle;
 
@@ -133,7 +130,7 @@ void drawPlayer() {
 void setupCamera() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(70.0, 16.0 / 9.0, 0.1, 200.0);  // 시야각 증가, 렌더 거리 증가
+    gluPerspective(70.0, 16.0 / 9.0, 0.1, 200.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -143,7 +140,7 @@ void setupCamera() {
     float camY = player.y + PLAYER_HEIGHT / 2.0f;
     float camZ = player.z;
 
-    // 카메라가 바라보는 방향 계산 (angleX, angleY 모두 적용)
+    // 카메라가 바라보는 방향 계산
     float angleYRad = player.angleY * 3.14159265f / 180.0f;
     float angleXRad = player.angleX * 3.14159265f / 180.0f;
 
@@ -172,19 +169,18 @@ void onKeyRelease(unsigned char key, int x, int y) {
 }
 
 void onSpecialKeyPress(int key, int x, int y) {
-    // 방향키 수정: 올바른 방향으로 매핑
     switch (key) {
     case GLUT_KEY_UP:
-        keyStates['w'] = true;  // 위 = 전진
+        keyStates['w'] = true;
         break;
     case GLUT_KEY_DOWN:
-        keyStates['s'] = true;  // 아래 = 후진
+        keyStates['s'] = true;
         break;
     case GLUT_KEY_LEFT:
-        keyStates['a'] = true;  // 왼쪽 = 왼쪽 이동
+        keyStates['a'] = true;
         break;
     case GLUT_KEY_RIGHT:
-        keyStates['d'] = true;  // 오른쪽 = 오른쪽 이동
+        keyStates['d'] = true;
         break;
     }
 }
@@ -206,7 +202,6 @@ void onSpecialKeyRelease(int key, int x, int y) {
     }
 }
 
-// 마우스 이동 콜백 - 부드러운 시점 회전
 void onMouseMove(int x, int y) {
     if (firstMouse) {
         lastMouseX = x;
@@ -215,22 +210,20 @@ void onMouseMove(int x, int y) {
         return;
     }
 
-    // 마우스 이동량 계산
     float xOffset = (x - lastMouseX) * MOUSE_SENSITIVITY;
-    float yOffset = (lastMouseY - y) * MOUSE_SENSITIVITY;  // Y축은 반대
+    float yOffset = (lastMouseY - y) * MOUSE_SENSITIVITY;
 
     lastMouseX = x;
     lastMouseY = y;
 
-    // 각도 업데이트
     player.angleY += xOffset;
     player.angleX += yOffset;
 
-    // 상하 각도 제한 (-89도 ~ 89도)
+    // 상하 각도 제한
     if (player.angleX > 89.0f) player.angleX = 89.0f;
     if (player.angleX < -89.0f) player.angleX = -89.0f;
 
-    // 좌우 각도는 0~360도로 정규화
+    // 좌우 각도 정규화
     if (player.angleY > 360.0f) player.angleY -= 360.0f;
     if (player.angleY < 0.0f) player.angleY += 360.0f;
 }

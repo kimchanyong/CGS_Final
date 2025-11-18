@@ -35,7 +35,7 @@ void initOpenGL() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // 마우스 커서 숨기기 (FPS 게임 스타일)
+    // 마우스 커서 숨기기
     glutSetCursor(GLUT_CURSOR_NONE);
 
     std::cout << "OpenGL initialized successfully" << std::endl;
@@ -57,7 +57,7 @@ void update() {
 
     updatePlayer(deltaTime);
 
-    // 마우스를 화면 중앙으로 재배치 (계속 회전 가능하도록)
+    // 마우스를 화면 중앙으로 재배치
     glutWarpPointer(windowWidth / 2, windowHeight / 2);
     lastMouseX = windowWidth / 2;
     lastMouseY = windowHeight / 2;
@@ -82,7 +82,7 @@ void reshape(int width, int height) {
 
 void printInstructions() {
     std::cout << "\n====================================" << std::endl;
-    std::cout << "  OpenGL Maze Game (Enhanced)" << std::endl;
+    std::cout << "  OpenGL Maze Game" << std::endl;
     std::cout << "====================================" << std::endl;
     std::cout << "\nControls:" << std::endl;
     std::cout << "  W/A/S/D or Arrow Keys - Move" << std::endl;
@@ -91,6 +91,12 @@ void printInstructions() {
     std::cout << "\nObjective:" << std::endl;
     std::cout << "  Collect all items (golden cubes)" << std::endl;
     std::cout << "  Reach the goal (green cylinder)" << std::endl;
+    std::cout << "\nMaze Tile Types:" << std::endl;
+    std::cout << "  -1 = Start position" << std::endl;
+    std::cout << "   0 = Empty space" << std::endl;
+    std::cout << "   1 = Wall" << std::endl;
+    std::cout << "   2 = Item" << std::endl;
+    std::cout << "   3 = Goal" << std::endl;
     std::cout << "===================================\n" << std::endl;
 }
 
@@ -99,7 +105,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowSize(windowWidth, windowHeight);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("OpenGL Maze Project - Enhanced");
+    glutCreateWindow("OpenGL Maze Project - Final");
 
     initOpenGL();
 
@@ -121,7 +127,7 @@ int main(int argc, char** argv) {
     glutKeyboardUpFunc(onKeyRelease);
     glutSpecialFunc(onSpecialKeyPress);
     glutSpecialUpFunc(onSpecialKeyRelease);
-    glutPassiveMotionFunc(onMouseMove);  // 마우스 이동 콜백!
+    glutPassiveMotionFunc(onMouseMove);
 
     printInstructions();
 

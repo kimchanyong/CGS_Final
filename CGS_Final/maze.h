@@ -3,7 +3,7 @@
 
 #include "util.h"
 
-// 미로 데이터 (extern으로 선언)
+// 미로 데이터
 extern int MAZE[MAX_MAZE_SIZE][MAX_MAZE_SIZE];
 extern int MAZE_ROWS;
 extern int MAZE_COLS;
@@ -13,12 +13,14 @@ enum TileType {
     TILE_EMPTY = 0,
     TILE_WALL = 1,
     TILE_ITEM = 2,
-    TILE_GOAL = 3
+    TILE_GOAL = 3,
+    TILE_START = -1  // 시작 지점 (음수로 구분)
 };
 
 // 미로 로딩 함수
 bool loadMaze(const char* filename);
 int countTotalItems();
+void getStartPosition(float& x, float& z);  // 시작 위치 찾기
 
 // 미로 렌더링 함수
 void drawMaze();

@@ -12,7 +12,6 @@ void drawWall() {
     glMaterialfv(GL_FRONT, GL_SPECULAR, wall_specular);
     glMaterialf(GL_FRONT, GL_SHININESS, 10.0f);
 
-    // 벽 크기 = CELL_SIZE (정확히 1타일 크기)
     float w = CELL_SIZE / 2.0f;
     float h = WALL_HEIGHT;
 
@@ -63,28 +62,24 @@ void drawWall() {
 
     glEnd();
 
-    // 모서리 강조선 그리기 (어두운 회색)
-    glDisable(GL_LIGHTING);  // 조명 끄기 (선명한 선)
-    glColor3f(0.1f, 0.1f, 0.15f);  // 어두운 청회색
-    glLineWidth(2.0f);  // 선 두께
+    // 모서리 강조선 그리기
+    glDisable(GL_LIGHTING);
+    glColor3f(0.1f, 0.1f, 0.15f);
+    glLineWidth(2.0f);
 
     // 수직 모서리 (4개)
     glBegin(GL_LINES);
-    // 앞-왼쪽
     glVertex3f(-w, 0, w);
     glVertex3f(-w, h, w);
-    // 앞-오른쪽
     glVertex3f(w, 0, w);
     glVertex3f(w, h, w);
-    // 뒤-왼쪽
     glVertex3f(-w, 0, -w);
     glVertex3f(-w, h, -w);
-    // 뒤-오른쪽
     glVertex3f(w, 0, -w);
     glVertex3f(w, h, -w);
     glEnd();
 
-    // 아래쪽 수평 모서리 (4개)
+    // 아래쪽 수평 모서리
     glBegin(GL_LINE_LOOP);
     glVertex3f(-w, 0, -w);
     glVertex3f(w, 0, -w);
@@ -92,7 +87,7 @@ void drawWall() {
     glVertex3f(-w, 0, w);
     glEnd();
 
-    // 위쪽 수평 모서리 (4개)
+    // 위쪽 수평 모서리
     glBegin(GL_LINE_LOOP);
     glVertex3f(-w, h, -w);
     glVertex3f(w, h, -w);
@@ -100,8 +95,8 @@ void drawWall() {
     glVertex3f(-w, h, w);
     glEnd();
 
-    glEnable(GL_LIGHTING);  // 조명 다시 켜기
-    glLineWidth(1.0f);  // 선 두께 복원
+    glEnable(GL_LIGHTING);
+    glLineWidth(1.0f);
 }
 
 void drawFloorTile() {
@@ -186,7 +181,6 @@ void drawGoal() {
 void drawMaze() {
     for (int i = 0; i < MAZE_ROWS; i++) {
         for (int j = 0; j < MAZE_COLS; j++) {
-            // 타일 중심 좌표 계산 (정확히 CELL_SIZE 간격)
             float x = i * CELL_SIZE - (MAZE_ROWS * CELL_SIZE) / 2.0f;
             float z = j * CELL_SIZE - (MAZE_COLS * CELL_SIZE) / 2.0f;
 
@@ -202,6 +196,9 @@ void drawMaze() {
                 break;
             case TILE_GOAL:
                 drawGoal();
+                break;
+            case TILE_START:  // -1은 바닥으로 렌더링
+                drawFloorTile();
                 break;
             default:
                 drawFloorTile();

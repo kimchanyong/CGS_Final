@@ -7,7 +7,7 @@
 struct Player {
     float x, y, z;          // 위치
     float angleY;           // Y축 회전 (좌우)
-    float angleX;           // X축 회전 (상하) - 새로 추가!
+    float angleX;           // X축 회전 (상하)
     float speed;            // 이동 속도
     int itemsCollected;     // 수집한 아이템 수
     int totalItems;         // 전체 아이템 수
@@ -20,7 +20,7 @@ extern Player player;
 // 키 상태 배열
 extern bool keyStates[256];
 
-// 마우스 상태 - 새로 추가!
+// 마우스 상태
 extern int lastMouseX;
 extern int lastMouseY;
 extern bool firstMouse;
@@ -38,6 +38,6 @@ void onKeyPress(unsigned char key, int x, int y);
 void onKeyRelease(unsigned char key, int x, int y);
 void onSpecialKeyPress(int key, int x, int y);
 void onSpecialKeyRelease(int key, int x, int y);
-void onMouseMove(int x, int y);  // 마우스 이동 콜백 추가!
+void onMouseMove(int x, int y);
 
 #endif
