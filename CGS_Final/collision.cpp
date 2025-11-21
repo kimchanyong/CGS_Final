@@ -30,11 +30,6 @@ void buildCollisionMap() {
     std::cout << "Collision map built successfully" << std::endl;
 }
 
-bool checkPointInAABB(float x, float z, const AABB& box) {
-    if (!box.active) return false;
-    return (x >= box.minX && x <= box.maxX && z >= box.minZ && z <= box.maxZ);
-}
-
 bool checkCollision(float x, float z, float radius) {
     for (int i = 0; i < MAZE_ROWS; i++) {
         for (int j = 0; j < MAZE_COLS; j++) {
@@ -63,29 +58,44 @@ bool checkCollision(float x, float z, float radius) {
     return false;
 }
 
-int checkItemCollision(float x, float z, float radius) {
-    int itemsCollected = 0;
+KeyCollection checkKeyCollision(float x, float z, float radius) {
+    KeyCollection collected;
 
     for (int i = 0; i < MAZE_ROWS; i++) {
         for (int j = 0; j < MAZE_COLS; j++) {
-            if (MAZE[i][j] == TILE_ITEM) {
-                float itemX = i * CELL_SIZE - (MAZE_ROWS * CELL_SIZE) / 2.0f;
-                float itemZ = j * CELL_SIZE - (MAZE_COLS * CELL_SIZE) / 2.0f;
+            int tile = MAZE[i][j];
 
-                float dx = x - itemX;
-                float dz = z - itemZ;
+            if (tile == TILE_RED_KEY || tile == TILE_BLUE_KEY || tile == TILE_YELLOW_KEY) {
+                float keyX = i * CELL_SIZE - (MAZE_ROWS * CELL_SIZE) / 2.0f;
+                float keyZ = j * CELL_SIZE - (MAZE_COLS * CELL_SIZE) / 2.0f;
+
+                float dx = x - keyX;
+                float dz = z - keyZ;
                 float distSquared = dx * dx + dz * dz;
                 float collectDist = radius + 0.5f;
 
                 if (distSquared < collectDist * collectDist) {
-                    MAZE[i][j] = TILE_EMPTY;
-                    itemsCollected++;
-                    std::cout << "Item collected!" << std::endl;
+                    if (tile == TILE_RED_KEY) {
+                        collected.redKey = true;
+                        MAZE[i][j] = TILE_EMPTY;
+                        std::cout << "RED KEY collected!" << std::endl;
+                    }
+                    else if (tile == TILE_BLUE_KEY) {
+                        collected.blueKey = true;
+                        MAZE[i][j] = TILE_EMPTY;
+                        std::cout << "BLUE KEY collected!" << std::endl;
+                    }
+                    else if (tile == TILE_YELLOW_KEY) {
+                        collected.yellowKey = true;
+                        MAZE[i][j] = TILE_EMPTY;
+                        std::cout << "YELLOW KEY collected!" << std::endl;
+                    }
                 }
             }
         }
     }
-    return itemsCollected;
+
+    return collected;
 }
 
 bool checkGoalCollision(float x, float z, float radius) {

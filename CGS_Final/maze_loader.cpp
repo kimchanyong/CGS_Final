@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-// 미로 데이터 전역 변수 정의
+// 미로 데이터 전역 변수
 int MAZE[MAX_MAZE_SIZE][MAX_MAZE_SIZE] = { 0 };
 int MAZE_ROWS = 0;
 int MAZE_COLS = 0;
@@ -20,7 +20,6 @@ bool loadMaze(const char* filename) {
         MAZE_ROWS = 10;
         MAZE_COLS = 10;
 
-        // 외곽 벽
         for (int i = 0; i < MAZE_ROWS; i++) {
             for (int j = 0; j < MAZE_COLS; j++) {
                 if (i == 0 || i == MAZE_ROWS - 1 || j == 0 || j == MAZE_COLS - 1) {
@@ -32,9 +31,10 @@ bool loadMaze(const char* filename) {
             }
         }
 
-        MAZE[1][1] = TILE_START;  // -1
-        MAZE[2][2] = TILE_ITEM;
-        MAZE[4][7] = TILE_ITEM;
+        MAZE[1][1] = TILE_START;
+        MAZE[2][2] = TILE_RED_KEY;
+        MAZE[4][4] = TILE_BLUE_KEY;
+        MAZE[6][6] = TILE_YELLOW_KEY;
         MAZE[MAZE_ROWS - 2][MAZE_COLS - 2] = TILE_GOAL;
 
         return false;
@@ -49,7 +49,6 @@ bool loadMaze(const char* filename) {
         int col = 0;
         int value;
 
-        // 공백으로 구분된 숫자 읽기 (음수 포함)
         while (iss >> value && col < MAX_MAZE_SIZE) {
             MAZE[row][col] = value;
             col++;
@@ -71,26 +70,31 @@ bool loadMaze(const char* filename) {
     return true;
 }
 
-// 전체 아이템 개수 계산
-int countTotalItems() {
-    int count = 0;
+// 각 종류별 열쇠 개수 계산
+void countItems(int& redKeys, int& blueKeys, int& yellowKeys) {
+    redKeys = 0;
+    blueKeys = 0;
+    yellowKeys = 0;
+
     for (int i = 0; i < MAZE_ROWS; i++) {
         for (int j = 0; j < MAZE_COLS; j++) {
-            if (MAZE[i][j] == TILE_ITEM) {
-                count++;
-            }
+            if (MAZE[i][j] == TILE_RED_KEY) redKeys++;
+            else if (MAZE[i][j] == TILE_BLUE_KEY) blueKeys++;
+            else if (MAZE[i][j] == TILE_YELLOW_KEY) yellowKeys++;
         }
     }
-    std::cout << "Total items in maze: " << count << std::endl;
-    return count;
+
+    std::cout << "Items in maze:" << std::endl;
+    std::cout << "  Red Keys: " << redKeys << std::endl;
+    std::cout << "  Blue Keys: " << blueKeys << std::endl;
+    std::cout << "  Yellow Keys: " << yellowKeys << std::endl;
 }
 
-// 시작 위치 찾기 함수 (타일 -1 찾기)
+// 시작 위치 찾기
 void getStartPosition(float& x, float& z) {
-    // 방법 1: 타일 -1(TILE_START) 찾기
     for (int i = 0; i < MAZE_ROWS; i++) {
         for (int j = 0; j < MAZE_COLS; j++) {
-            if (MAZE[i][j] == TILE_START) {  // -1
+            if (MAZE[i][j] == TILE_START) {
                 x = i * CELL_SIZE - (MAZE_ROWS * CELL_SIZE) / 2.0f;
                 z = j * CELL_SIZE - (MAZE_COLS * CELL_SIZE) / 2.0f;
                 std::cout << "Start position found at tile (" << i << ", " << j << ")" << std::endl;
@@ -100,7 +104,6 @@ void getStartPosition(float& x, float& z) {
         }
     }
 
-    // 방법 2: 타일 -1이 없으면 첫 번째 빈 공간(0) 찾기
     std::cout << "No start position (-1) found, searching for first empty space..." << std::endl;
     for (int i = 0; i < MAZE_ROWS; i++) {
         for (int j = 0; j < MAZE_COLS; j++) {
@@ -108,13 +111,11 @@ void getStartPosition(float& x, float& z) {
                 x = i * CELL_SIZE - (MAZE_ROWS * CELL_SIZE) / 2.0f;
                 z = j * CELL_SIZE - (MAZE_COLS * CELL_SIZE) / 2.0f;
                 std::cout << "Using first empty space at tile (" << i << ", " << j << ")" << std::endl;
-                std::cout << "World coordinates: (" << x << ", " << z << ")" << std::endl;
                 return;
             }
         }
     }
 
-    // 방법 3: 아무것도 없으면 중앙 (기본값)
     std::cout << "Warning: No empty space found! Using center (0, 0)" << std::endl;
     x = 0.0f;
     z = 0.0f;

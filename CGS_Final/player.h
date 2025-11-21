@@ -5,13 +5,18 @@
 
 // 플레이어 상태 구조체
 struct Player {
-    float x, y, z;          // 위치
-    float angleY;           // Y축 회전 (좌우)
-    float angleX;           // X축 회전 (상하)
-    float speed;            // 이동 속도
-    int itemsCollected;     // 수집한 아이템 수
-    int totalItems;         // 전체 아이템 수
-    bool reachedGoal;       // 골 도달 여부
+    float x, y, z;
+    float angleY;
+    float angleX;
+    float speed;
+
+    // 열쇠 수집 상태
+    bool hasRedKey;
+    bool hasBlueKey;
+    bool hasYellowKey;
+
+    bool reachedGoal;
+    bool goalActivated;  // 출구 활성화 여부
 };
 
 // 전역 플레이어 객체
@@ -39,5 +44,9 @@ void onKeyRelease(unsigned char key, int x, int y);
 void onSpecialKeyPress(int key, int x, int y);
 void onSpecialKeyRelease(int key, int x, int y);
 void onMouseMove(int x, int y);
+
+// 유틸리티
+bool hasAllKeys();
+int getKeyCount();
 
 #endif

@@ -1,32 +1,43 @@
-#include "player.h"
+ï»¿#include "player.h"
 #include "collision.h"
 #include "maze.h"
 #include <GL/glut.h>
 #include <iostream>
 #include <cmath>
 
-// Àü¿ª º¯¼ö
+// ì „ì—­ ë³€ìˆ˜
 Player player;
 bool keyStates[256] = { false };
 
-// ¸¶¿ì½º »óÅÂ
+// ë§ˆìš°ìŠ¤ ìƒíƒœ
 int lastMouseX = 640;
 int lastMouseY = 360;
 bool firstMouse = true;
 
 void initPlayer() {
-    // ¹Ì·Î¿¡¼­ ½ÃÀÛ À§Ä¡ Ã£±â (Å¸ÀÏ -1)
     getStartPosition(player.x, player.z);
 
     player.y = PLAYER_HEIGHT / 2.0f;
     player.angleY = 0.0f;
     player.angleX = 0.0f;
     player.speed = MOVE_SPEED;
-    player.itemsCollected = 0;
-    player.totalItems = 0;
-    player.reachedGoal = false;
 
-    std::cout << "Player initialized successfully" << std::endl;
+    player.hasRedKey = false;
+    player.hasBlueKey = false;
+    player.hasYellowKey = false;
+
+    player.reachedGoal = false;
+    player.goalActivated = false;
+
+    std::cout << "Player initialized at world position (" << player.x << ", " << player.z << ")" << std::endl;
+}
+
+bool hasAllKeys() {
+    return player.hasRedKey && player.hasBlueKey && player.hasYellowKey;
+}
+
+int getKeyCount() {
+    return (player.hasRedKey ? 1 : 0) + (player.hasBlueKey ? 1 : 0) + (player.hasYellowKey ? 1 : 0);
 }
 
 void updatePlayer(float deltaTime) {
@@ -35,7 +46,7 @@ void updatePlayer(float deltaTime) {
     float moveX = 0.0f;
     float moveZ = 0.0f;
 
-    // Å° »óÅÂ¿¡ µû¸¥ ÀÌµ¿ ¹æÇâ
+    // í‚¤ ìƒíƒœì— ë”°ë¥¸ ì´ë™ ë°©í–¥
     if (keyStates['w'] || keyStates['W']) {
         moveZ -= 1.0f;
     }
@@ -49,10 +60,10 @@ void updatePlayer(float deltaTime) {
         moveX += 1.0f;
     }
 
-    // ´ë°¢¼± ÀÌµ¿ Á¤±ÔÈ­
+    // ëŒ€ê°ì„  ì´ë™ ì •ê·œí™”
     normalize2D(moveX, moveZ);
 
-    // Ä«¸Ş¶ó ¹æÇâ ±âÁØÀ¸·Î ÀÌµ¿ º¤ÅÍ º¯È¯
+    // ì¹´ë©”ë¼ ë°©í–¥ ê¸°ì¤€ ì´ë™
     float angleRad = player.angleY * 3.14159265f / 180.0f;
     float cosAngle = std::cos(angleRad);
     float sinAngle = std::sin(angleRad);
@@ -60,17 +71,16 @@ void updatePlayer(float deltaTime) {
     float worldMoveX = moveX * cosAngle - moveZ * sinAngle;
     float worldMoveZ = moveX * sinAngle + moveZ * cosAngle;
 
-    // ½ÇÁ¦ ÀÌµ¿
     float nx = player.x + worldMoveX * player.speed;
     float nz = player.z + worldMoveZ * player.speed;
 
-    // Ãæµ¹ °Ë»ç
+    // ì¶©ëŒ ê²€ì‚¬
     if (!checkCollision(nx, nz, PLAYER_RADIUS)) {
         player.x = nx;
         player.z = nz;
     }
     else {
-        // ½½¶óÀÌµù Ãæµ¹
+        // ìŠ¬ë¼ì´ë”© ì¶©ëŒ
         if (!checkCollision(nx, player.z, PLAYER_RADIUS)) {
             player.x = nx;
         }
@@ -79,34 +89,50 @@ void updatePlayer(float deltaTime) {
         }
     }
 
-    // ¾ÆÀÌÅÛ ¼öÁı
-    int collected = checkItemCollision(player.x, player.z, PLAYER_RADIUS);
-    player.itemsCollected += collected;
+    // ì—´ì‡  ìˆ˜ì§‘
+    KeyCollection keys = checkKeyCollision(player.x, player.z, PLAYER_RADIUS);
 
-    if (collected > 0) {
-        std::cout << "Items: " << player.itemsCollected << "/" << player.totalItems << std::endl;
+    if (keys.redKey && !player.hasRedKey) {
+        player.hasRedKey = true;
+        std::cout << "Keys: " << getKeyCount() << "/3" << std::endl;
+    }
+    if (keys.blueKey && !player.hasBlueKey) {
+        player.hasBlueKey = true;
+        std::cout << "Keys: " << getKeyCount() << "/3" << std::endl;
+    }
+    if (keys.yellowKey && !player.hasYellowKey) {
+        player.hasYellowKey = true;
+        std::cout << "Keys: " << getKeyCount() << "/3" << std::endl;
     }
 
-    // °ñ µµ´Ş Ã¼Å©
-    if (player.itemsCollected >= player.totalItems) {
-        if (checkGoalCollision(player.x, player.z, PLAYER_RADIUS)) {
+    // ëª¨ë“  ì—´ì‡ ë¥¼ ëª¨ì•˜ëŠ”ì§€ í™•ì¸
+    if (hasAllKeys() && !player.goalActivated) {
+        player.goalActivated = true;
+        std::cout << "\n========================================" << std::endl;
+        std::cout << "  ì¶œêµ¬ê°€ í™œì„±í™”ë˜ì—ˆìŠµë‹ˆë‹¤!" << std::endl;
+        std::cout << "  The exit is now activated!" << std::endl;
+        std::cout << "========================================\n" << std::endl;
+    }
+
+    // ê³¨ ë„ë‹¬ ì²´í¬
+    if (checkGoalCollision(player.x, player.z, PLAYER_RADIUS)) {
+        if (player.goalActivated) {
             if (!player.reachedGoal) {
                 player.reachedGoal = true;
-                std::cout << "\n=== GOAL REACHED! ===" << std::endl;
-                std::cout << "All items collected: " << player.itemsCollected << "/" << player.totalItems << std::endl;
-                std::cout << "Press ESC to exit" << std::endl;
+                std::cout << "\n========================================" << std::endl;
+                std::cout << "  ì¶•í•˜í•©ë‹ˆë‹¤! íƒˆì¶œì— ì„±ê³µí–ˆìŠµë‹ˆë‹¤!" << std::endl;
+                std::cout << "  CONGRATULATIONS! You escaped!" << std::endl;
+                std::cout << "  Press ESC to exit" << std::endl;
+                std::cout << "========================================\n" << std::endl;
             }
         }
-    }
-    else {
-        static bool showedMessage = false;
-        if (checkGoalCollision(player.x, player.z, PLAYER_RADIUS) && !showedMessage) {
-            std::cout << "Collect all items first! ("
-                << player.itemsCollected << "/" << player.totalItems << ")" << std::endl;
-            showedMessage = true;
-        }
-        if (!checkGoalCollision(player.x, player.z, PLAYER_RADIUS)) {
-            showedMessage = false;
+        else {
+            static bool showedWarning = false;
+            if (!showedWarning) {
+                std::cout << "\nì¶œêµ¬ê°€ ì ê²¨ìˆìŠµë‹ˆë‹¤! ëª¨ë“  ì—´ì‡ ë¥¼ ì°¾ìœ¼ì„¸ìš”! ("
+                    << getKeyCount() << "/3)" << std::endl;
+                showedWarning = true;
+            }
         }
     }
 }
@@ -135,12 +161,10 @@ void setupCamera() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // 1ÀÎÄª Ä«¸Ş¶ó
     float camX = player.x;
     float camY = player.y + PLAYER_HEIGHT / 2.0f;
     float camZ = player.z;
 
-    // Ä«¸Ş¶ó°¡ ¹Ù¶óº¸´Â ¹æÇâ °è»ê
     float angleYRad = player.angleY * 3.14159265f / 180.0f;
     float angleXRad = player.angleX * 3.14159265f / 180.0f;
 
@@ -219,11 +243,9 @@ void onMouseMove(int x, int y) {
     player.angleY += xOffset;
     player.angleX += yOffset;
 
-    // »óÇÏ °¢µµ Á¦ÇÑ
     if (player.angleX > 89.0f) player.angleX = 89.0f;
     if (player.angleX < -89.0f) player.angleX = -89.0f;
 
-    // ÁÂ¿ì °¢µµ Á¤±ÔÈ­
     if (player.angleY > 360.0f) player.angleY -= 360.0f;
     if (player.angleY < 0.0f) player.angleY += 360.0f;
 }

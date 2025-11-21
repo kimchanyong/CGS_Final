@@ -1,4 +1,5 @@
 #include "maze.h"
+#include "player.h"
 #include <GL/glut.h>
 #include <cmath>
 
@@ -15,7 +16,6 @@ void drawWall() {
     float w = CELL_SIZE / 2.0f;
     float h = WALL_HEIGHT;
 
-    // 벽 면 그리기
     glBegin(GL_QUADS);
 
     // 앞면
@@ -62,37 +62,26 @@ void drawWall() {
 
     glEnd();
 
-    // 모서리 강조선 그리기
+    // 모서리 강조선
     glDisable(GL_LIGHTING);
     glColor3f(0.1f, 0.1f, 0.15f);
     glLineWidth(2.0f);
 
-    // 수직 모서리 (4개)
     glBegin(GL_LINES);
-    glVertex3f(-w, 0, w);
-    glVertex3f(-w, h, w);
-    glVertex3f(w, 0, w);
-    glVertex3f(w, h, w);
-    glVertex3f(-w, 0, -w);
-    glVertex3f(-w, h, -w);
-    glVertex3f(w, 0, -w);
-    glVertex3f(w, h, -w);
+    glVertex3f(-w, 0, w); glVertex3f(-w, h, w);
+    glVertex3f(w, 0, w); glVertex3f(w, h, w);
+    glVertex3f(-w, 0, -w); glVertex3f(-w, h, -w);
+    glVertex3f(w, 0, -w); glVertex3f(w, h, -w);
     glEnd();
 
-    // 아래쪽 수평 모서리
     glBegin(GL_LINE_LOOP);
-    glVertex3f(-w, 0, -w);
-    glVertex3f(w, 0, -w);
-    glVertex3f(w, 0, w);
-    glVertex3f(-w, 0, w);
+    glVertex3f(-w, 0, -w); glVertex3f(w, 0, -w);
+    glVertex3f(w, 0, w); glVertex3f(-w, 0, w);
     glEnd();
 
-    // 위쪽 수평 모서리
     glBegin(GL_LINE_LOOP);
-    glVertex3f(-w, h, -w);
-    glVertex3f(w, h, -w);
-    glVertex3f(w, h, w);
-    glVertex3f(-w, h, w);
+    glVertex3f(-w, h, -w); glVertex3f(w, h, -w);
+    glVertex3f(w, h, w); glVertex3f(-w, h, w);
     glEnd();
 
     glEnable(GL_LIGHTING);
@@ -117,16 +106,17 @@ void drawFloorTile() {
     glEnd();
 }
 
-void drawItem() {
+void drawRedKey() {
     drawFloorTile();
 
-    GLfloat item_ambient[] = { 0.5f, 0.4f, 0.0f, 1.0f };
-    GLfloat item_diffuse[] = { 0.8f, 0.7f, 0.0f, 1.0f };
-    GLfloat item_specular[] = { 1.0f, 1.0f, 0.5f, 1.0f };
+    // 빨간색 열쇠
+    GLfloat key_ambient[] = { 0.5f, 0.0f, 0.0f, 1.0f };
+    GLfloat key_diffuse[] = { 0.9f, 0.1f, 0.1f, 1.0f };
+    GLfloat key_specular[] = { 1.0f, 0.3f, 0.3f, 1.0f };
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT, item_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, item_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, item_specular);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, key_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, key_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, key_specular);
     glMaterialf(GL_FRONT, GL_SHININESS, 50.0f);
 
     glPushMatrix();
@@ -136,12 +126,64 @@ void drawItem() {
     glPopMatrix();
 }
 
-void drawGoal() {
+void drawBlueKey() {
     drawFloorTile();
 
-    GLfloat goal_ambient[] = { 0.0f, 0.3f, 0.0f, 1.0f };
-    GLfloat goal_diffuse[] = { 0.0f, 0.8f, 0.0f, 1.0f };
-    GLfloat goal_specular[] = { 0.2f, 1.0f, 0.2f, 1.0f };
+    // 파란색 열쇠
+    GLfloat key_ambient[] = { 0.0f, 0.0f, 0.5f, 1.0f };
+    GLfloat key_diffuse[] = { 0.1f, 0.1f, 0.9f, 1.0f };
+    GLfloat key_specular[] = { 0.3f, 0.3f, 1.0f, 1.0f };
+
+    glMaterialfv(GL_FRONT, GL_AMBIENT, key_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, key_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, key_specular);
+    glMaterialf(GL_FRONT, GL_SHININESS, 50.0f);
+
+    glPushMatrix();
+    glTranslatef(0, 0.5f, 0);
+    glScalef(0.4f, 0.4f, 0.4f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+}
+
+void drawYellowKey() {
+    drawFloorTile();
+
+    // 노란색 열쇠
+    GLfloat key_ambient[] = { 0.5f, 0.5f, 0.0f, 1.0f };
+    GLfloat key_diffuse[] = { 0.9f, 0.9f, 0.1f, 1.0f };
+    GLfloat key_specular[] = { 1.0f, 1.0f, 0.3f, 1.0f };
+
+    glMaterialfv(GL_FRONT, GL_AMBIENT, key_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, key_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, key_specular);
+    glMaterialf(GL_FRONT, GL_SHININESS, 50.0f);
+
+    glPushMatrix();
+    glTranslatef(0, 0.5f, 0);
+    glScalef(0.4f, 0.4f, 0.4f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+}
+
+void drawGoal(bool activated) {
+    drawFloorTile();
+
+    // 활성화 상태에 따라 색상 변경
+    GLfloat goal_ambient[4], goal_diffuse[4], goal_specular[4];
+
+    if (activated) {
+        // 활성화: 밝은 초록색
+        goal_ambient[0] = 0.0f; goal_ambient[1] = 0.5f; goal_ambient[2] = 0.0f; goal_ambient[3] = 1.0f;
+        goal_diffuse[0] = 0.0f; goal_diffuse[1] = 1.0f; goal_diffuse[2] = 0.0f; goal_diffuse[3] = 1.0f;
+        goal_specular[0] = 0.3f; goal_specular[1] = 1.0f; goal_specular[2] = 0.3f; goal_specular[3] = 1.0f;
+    }
+    else {
+        // 비활성화: 어두운 회색
+        goal_ambient[0] = 0.2f; goal_ambient[1] = 0.2f; goal_ambient[2] = 0.2f; goal_ambient[3] = 1.0f;
+        goal_diffuse[0] = 0.3f; goal_diffuse[1] = 0.3f; goal_diffuse[2] = 0.3f; goal_diffuse[3] = 1.0f;
+        goal_specular[0] = 0.1f; goal_specular[1] = 0.1f; goal_specular[2] = 0.1f; goal_specular[3] = 1.0f;
+    }
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, goal_ambient);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, goal_diffuse);
@@ -191,15 +233,20 @@ void drawMaze() {
             case TILE_WALL:
                 drawWall();
                 break;
-            case TILE_ITEM:
-                drawItem();
+            case TILE_RED_KEY:
+                drawRedKey();
+                break;
+            case TILE_BLUE_KEY:
+                drawBlueKey();
+                break;
+            case TILE_YELLOW_KEY:
+                drawYellowKey();
                 break;
             case TILE_GOAL:
-                drawGoal();
+                drawGoal(player.goalActivated);  // 활성화 상태 전달
                 break;
-            case TILE_START:  // -1은 바닥으로 렌더링
-                drawFloorTile();
-                break;
+            case TILE_START:
+            case TILE_EMPTY:
             default:
                 drawFloorTile();
                 break;

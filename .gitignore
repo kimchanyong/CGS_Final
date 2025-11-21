@@ -1,93 +1,54 @@
-###############################
 # Visual Studio
-###############################
-
 .vs/
-*.vcxproj.user
 *.suo
 *.user
-*.cache
-*.VC.db
-*.VC.opendb
-*.ipch
+*.userosscache
+*.sln.docstates
+*.vcxproj.filters
+*.vcxproj.user
 
-###############################
-# Build folders (C++)
-###############################
-
+# Build results
 Debug/
 Release/
 x64/
 x86/
-bin/
-obj/
-ipch/
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
 
-###############################
-# Build artifacts
-###############################
+# Visual Studio cache/options
+.vscode/
+*.sln
+*.vcxproj
 
-*.exp
-*.ilk
-*.iobj
-*.ipdb
-*.log
-*.pch
-*.pdb
-*.idb
-*.tlog
-*.manifest
-
-###############################
-# C/C++ intermediate files
-###############################
-
+# Compiled files
+*.exe
 *.obj
-*.o
-*.gch
+*.pdb
+*.ilk
+*.lib
+*.dll
+*.exp
+*.idb
+*.pch
 
-###############################
-# OpenGL / FreeGLUT
-###############################
+# OpenGL/GLUT
+freeglut.dll
+glut32.dll
 
-# DLL은 개발 PC에만 필요하고 Git에 올리면 안 됨
-freeglut-3.2.1_artech/dll/
-freeglut-3.2.1_artech/lib/
-
-###############################
-# System files
-###############################
-
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-###############################
-# Temporary files
-###############################
-
-*.tmp
-*.temp
+# Backup files
 *.bak
-*.old
+*~
+*.swp
+*.tmp
 
-###############################
-# Visual Studio Backup
-###############################
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
 
-*.synctex.gz
-*.zip
-*.rar
-*.7z
-
-###############################
-# Project-specific excludes
-###############################
-
-# VS에서 자동 생성되는 거대한 자동 PCH 파일
-**/AutoPCH/
-**/*.ipch
-
-# map 파일을 제외하고 싶다면 아래 주석 해제
-#*.map
+# Test/temporary files (optional - 테스트용 파일 보관하려면 주석처리)
+# maze_backup.txt
+# maze_test.txt
+# maze_tiny.txt

@@ -35,7 +35,6 @@ void initOpenGL() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // 마우스 커서 숨기기
     glutSetCursor(GLUT_CURSOR_NONE);
 
     std::cout << "OpenGL initialized successfully" << std::endl;
@@ -57,11 +56,6 @@ void update() {
 
     updatePlayer(deltaTime);
 
-    // 마우스를 화면 중앙으로 재배치
-    glutWarpPointer(windowWidth / 2, windowHeight / 2);
-    lastMouseX = windowWidth / 2;
-    lastMouseY = windowHeight / 2;
-
     glutPostRedisplay();
 }
 
@@ -82,21 +76,18 @@ void reshape(int width, int height) {
 
 void printInstructions() {
     std::cout << "\n====================================" << std::endl;
-    std::cout << "  OpenGL Maze Game" << std::endl;
+    std::cout << "  OpenGL Maze Game - Key Collection" << std::endl;
     std::cout << "====================================" << std::endl;
     std::cout << "\nControls:" << std::endl;
     std::cout << "  W/A/S/D or Arrow Keys - Move" << std::endl;
     std::cout << "  MOUSE - Look around" << std::endl;
     std::cout << "  ESC - Exit" << std::endl;
     std::cout << "\nObjective:" << std::endl;
-    std::cout << "  Collect all items (golden cubes)" << std::endl;
-    std::cout << "  Reach the goal (green cylinder)" << std::endl;
-    std::cout << "\nMaze Tile Types:" << std::endl;
-    std::cout << "  -1 = Start position" << std::endl;
-    std::cout << "   0 = Empty space" << std::endl;
-    std::cout << "   1 = Wall" << std::endl;
-    std::cout << "   2 = Item" << std::endl;
-    std::cout << "   3 = Goal" << std::endl;
+    std::cout << "  Collect all 3 keys:" << std::endl;
+    std::cout << "    - RED Key" << std::endl;
+    std::cout << "    - BLUE Key" << std::endl;
+    std::cout << "    - YELLOW Key" << std::endl;
+    std::cout << "  Then reach the EXIT!" << std::endl;
     std::cout << "===================================\n" << std::endl;
 }
 
@@ -105,19 +96,17 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowSize(windowWidth, windowHeight);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("OpenGL Maze Project - Final");
+    glutCreateWindow("OpenGL Maze - Key Collection Game");
 
     initOpenGL();
 
     if (!loadMaze("maze.txt")) {
-        std::cout << "Using default maze" << std::endl;
+        std::cerr << "Failed to load maze!" << std::endl;
+        return 1;
     }
 
     buildCollisionMap();
-
     initPlayer();
-    player.totalItems = countTotalItems();
-    std::cout << "Objective: Collect all " << player.totalItems << " items!" << std::endl;
 
     // 콜백 등록
     glutDisplayFunc(render);
@@ -132,8 +121,6 @@ int main(int argc, char** argv) {
     printInstructions();
 
     lastTime = glutGet(GLUT_ELAPSED_TIME);
-
-    // 마우스를 화면 중앙으로 초기화
     glutWarpPointer(windowWidth / 2, windowHeight / 2);
 
     glutMainLoop();
