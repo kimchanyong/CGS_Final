@@ -1,7 +1,12 @@
+#include "object.h"
 #include "maze.h"
 #include "player.h"
 #include <GL/glut.h>
 #include <cmath>
+
+Mesh goblet1Mesh;
+Mesh goblet2Mesh;
+Mesh goblet3Mesh;
 
 void drawWall() {
     GLfloat wall_ambient[] = { 0.3f, 0.3f, 0.3f, 1.0f };
@@ -122,7 +127,7 @@ void drawRedKey() {
     glPushMatrix();
     glTranslatef(0, 0.5f, 0);
     glScalef(0.4f, 0.4f, 0.4f);
-    glutSolidCube(1.0);
+    goblet1Mesh.Draw();
     glPopMatrix();
 }
 
@@ -142,7 +147,7 @@ void drawBlueKey() {
     glPushMatrix();
     glTranslatef(0, 0.5f, 0);
     glScalef(0.4f, 0.4f, 0.4f);
-    glutSolidCube(1.0);
+    goblet2Mesh.Draw();
     glPopMatrix();
 }
 
@@ -162,7 +167,7 @@ void drawYellowKey() {
     glPushMatrix();
     glTranslatef(0, 0.5f, 0);
     glScalef(0.4f, 0.4f, 0.4f);
-    glutSolidCube(1.0);
+    goblet3Mesh.Draw();
     glPopMatrix();
 }
 

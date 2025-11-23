@@ -1,5 +1,6 @@
 ﻿#include <GL/glut.h>
 #include <iostream>
+#include "object.h"
 #include "maze.h"
 #include "player.h"
 #include "collision.h"
@@ -7,6 +8,7 @@
 int lastTime = 0;
 int windowWidth = 1280;
 int windowHeight = 720;
+
 
 void initOpenGL() {
     glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
@@ -34,6 +36,11 @@ void initOpenGL() {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    goblet1Mesh.LoadSOR("goblet1.txt");
+    goblet2Mesh.LoadSOR("goblet2.txt");
+    goblet3Mesh.LoadSOR("goblet3.txt");
+
 
     glutSetCursor(GLUT_CURSOR_NONE);
 
