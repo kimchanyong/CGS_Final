@@ -3,6 +3,7 @@
 #include "maze.h"
 #include "player.h"
 #include "collision.h"
+#include "tagger.h"  // 술래 추가
 
 int lastTime = 0;
 int windowWidth = 1280;
@@ -45,6 +46,7 @@ void render() {
 
     setupCamera();
     drawMaze();
+    drawTagger();  // 술래 렌더링 추가
 
     glutSwapBuffers();
 }
@@ -55,6 +57,7 @@ void update() {
     lastTime = currentTime;
 
     updatePlayer(deltaTime);
+    updateTagger(deltaTime);  // 술래 업데이트 추가
 
     glutPostRedisplay();
 }
@@ -75,20 +78,24 @@ void reshape(int width, int height) {
 }
 
 void printInstructions() {
-    std::cout << "\n====================================" << std::endl;
-    std::cout << "  OpenGL Maze Game - Key Collection" << std::endl;
-    std::cout << "====================================" << std::endl;
+    std::cout << "\n============================================" << std::endl;
+    std::cout << "  OpenGL Maze Game - Tag Game (술래잡기)" << std::endl;
+    std::cout << "============================================" << std::endl;
     std::cout << "\nControls:" << std::endl;
     std::cout << "  W/A/S/D or Arrow Keys - Move" << std::endl;
     std::cout << "  MOUSE - Look around" << std::endl;
     std::cout << "  ESC - Exit" << std::endl;
     std::cout << "\nObjective:" << std::endl;
-    std::cout << "  Collect all 3 keys:" << std::endl;
-    std::cout << "    - RED Key" << std::endl;
-    std::cout << "    - BLUE Key" << std::endl;
-    std::cout << "    - YELLOW Key" << std::endl;
-    std::cout << "  Then reach the EXIT!" << std::endl;
-    std::cout << "===================================\n" << std::endl;
+    std::cout << "  1. Collect all 3 keys:" << std::endl;
+    std::cout << "     - RED Key" << std::endl;
+    std::cout << "     - BLUE Key" << std::endl;
+    std::cout << "     - YELLOW Key" << std::endl;
+    std::cout << "  2. Reach the EXIT!" << std::endl;
+    std::cout << "\n  WARNING:" << std::endl;
+    std::cout << "  The RED TAGGER is hunting you!" << std::endl;
+    std::cout << "  If it catches you = GAME OVER!" << std::endl;
+    std::cout << "  The tagger uses A* pathfinding to chase you!" << std::endl;
+    std::cout << "============================================\n" << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -96,7 +103,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowSize(windowWidth, windowHeight);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("OpenGL Maze - Key Collection Game");
+    glutCreateWindow("OpenGL Maze - Tag Game");
 
     initOpenGL();
 
@@ -107,8 +114,8 @@ int main(int argc, char** argv) {
 
     buildCollisionMap();
     initPlayer();
+    initTagger();  // 술래 초기화 추가
 
-    // 콜백 등록
     glutDisplayFunc(render);
     glutIdleFunc(update);
     glutReshapeFunc(reshape);

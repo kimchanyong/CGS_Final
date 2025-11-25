@@ -131,12 +131,14 @@
     <ClCompile Include="maze_loader.cpp" />
     <ClCompile Include="maze_renderer.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="tagger.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="collision.h" />
     <ClInclude Include="maze.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="tagger.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-// 미로 데이터 전역 변수
+// 미로 데이터 전역 변수 정의
 int MAZE[MAX_MAZE_SIZE][MAX_MAZE_SIZE] = { 0 };
 int MAZE_ROWS = 0;
 int MAZE_COLS = 0;
@@ -14,29 +14,6 @@ bool loadMaze(const char* filename) {
 
     if (!file.is_open()) {
         std::cerr << "Error: Cannot open maze file: " << filename << std::endl;
-        std::cerr << "Creating default maze..." << std::endl;
-
-        // 기본 미로 생성
-        MAZE_ROWS = 10;
-        MAZE_COLS = 10;
-
-        for (int i = 0; i < MAZE_ROWS; i++) {
-            for (int j = 0; j < MAZE_COLS; j++) {
-                if (i == 0 || i == MAZE_ROWS - 1 || j == 0 || j == MAZE_COLS - 1) {
-                    MAZE[i][j] = TILE_WALL;
-                }
-                else {
-                    MAZE[i][j] = TILE_EMPTY;
-                }
-            }
-        }
-
-        MAZE[1][1] = TILE_START;
-        MAZE[2][2] = TILE_RED_KEY;
-        MAZE[4][4] = TILE_BLUE_KEY;
-        MAZE[6][6] = TILE_YELLOW_KEY;
-        MAZE[MAZE_ROWS - 2][MAZE_COLS - 2] = TILE_GOAL;
-
         return false;
     }
 
@@ -70,27 +47,6 @@ bool loadMaze(const char* filename) {
     return true;
 }
 
-// 각 종류별 열쇠 개수 계산
-void countItems(int& redKeys, int& blueKeys, int& yellowKeys) {
-    redKeys = 0;
-    blueKeys = 0;
-    yellowKeys = 0;
-
-    for (int i = 0; i < MAZE_ROWS; i++) {
-        for (int j = 0; j < MAZE_COLS; j++) {
-            if (MAZE[i][j] == TILE_RED_KEY) redKeys++;
-            else if (MAZE[i][j] == TILE_BLUE_KEY) blueKeys++;
-            else if (MAZE[i][j] == TILE_YELLOW_KEY) yellowKeys++;
-        }
-    }
-
-    std::cout << "Items in maze:" << std::endl;
-    std::cout << "  Red Keys: " << redKeys << std::endl;
-    std::cout << "  Blue Keys: " << blueKeys << std::endl;
-    std::cout << "  Yellow Keys: " << yellowKeys << std::endl;
-}
-
-// 시작 위치 찾기
 void getStartPosition(float& x, float& z) {
     for (int i = 0; i < MAZE_ROWS; i++) {
         for (int j = 0; j < MAZE_COLS; j++) {
@@ -98,13 +54,12 @@ void getStartPosition(float& x, float& z) {
                 x = i * CELL_SIZE - (MAZE_ROWS * CELL_SIZE) / 2.0f;
                 z = j * CELL_SIZE - (MAZE_COLS * CELL_SIZE) / 2.0f;
                 std::cout << "Start position found at tile (" << i << ", " << j << ")" << std::endl;
-                std::cout << "World coordinates: (" << x << ", " << z << ")" << std::endl;
                 return;
             }
         }
     }
 
-    std::cout << "No start position (-1) found, searching for first empty space..." << std::endl;
+    std::cout << "No start position (-1) found, using first empty space..." << std::endl;
     for (int i = 0; i < MAZE_ROWS; i++) {
         for (int j = 0; j < MAZE_COLS; j++) {
             if (MAZE[i][j] == TILE_EMPTY) {
@@ -116,7 +71,41 @@ void getStartPosition(float& x, float& z) {
         }
     }
 
-    std::cout << "Warning: No empty space found! Using center (0, 0)" << std::endl;
     x = 0.0f;
     z = 0.0f;
+}
+
+void getGoalPosition(float& x, float& z) {
+    for (int i = 0; i < MAZE_ROWS; i++) {
+        for (int j = 0; j < MAZE_COLS; j++) {
+            if (MAZE[i][j] == TILE_GOAL) {
+                x = i * CELL_SIZE - (MAZE_ROWS * CELL_SIZE) / 2.0f;
+                z = j * CELL_SIZE - (MAZE_COLS * CELL_SIZE) / 2.0f;
+                std::cout << "Goal position found at tile (" << i << ", " << j << ")" << std::endl;
+                return;
+            }
+        }
+    }
+
+    x = 0.0f;
+    z = 0.0f;
+    std::cout << "Warning: No goal position (-2) found!" << std::endl;
+}
+
+// 월드 좌표를 타일 좌표로 변환
+void worldToTile(float worldX, float worldZ, int& tileI, int& tileJ) {
+    tileI = (int)((worldX + (MAZE_ROWS * CELL_SIZE) / 2.0f) / CELL_SIZE);
+    tileJ = (int)((worldZ + (MAZE_COLS * CELL_SIZE) / 2.0f) / CELL_SIZE);
+
+    // 범위 체크
+    if (tileI < 0) tileI = 0;
+    if (tileI >= MAZE_ROWS) tileI = MAZE_ROWS - 1;
+    if (tileJ < 0) tileJ = 0;
+    if (tileJ >= MAZE_COLS) tileJ = MAZE_COLS - 1;
+}
+
+// 타일 좌표를 월드 좌표로 변환 (타일 중앙)
+void tileToWorld(int tileI, int tileJ, float& worldX, float& worldZ) {
+    worldX = tileI * CELL_SIZE - (MAZE_ROWS * CELL_SIZE) / 2.0f;
+    worldZ = tileJ * CELL_SIZE - (MAZE_COLS * CELL_SIZE) / 2.0f;
 }
