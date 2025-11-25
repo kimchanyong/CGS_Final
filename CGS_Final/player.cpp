@@ -131,9 +131,7 @@ void updatePlayer(float deltaTime) {
         }
     }
 
-    // ========================================
-    // 술래 충돌 체크 (추가)
-    // ========================================
+    // 술래 충돌 체크
     if (checkTaggerCatch(player.x, player.z)) {
         if (!player.isCaught) {
             player.isCaught = true;
@@ -237,6 +235,11 @@ void onSpecialKeyRelease(int key, int x, int y) {
 }
 
 void onMouseMove(int x, int y) {
+    // 🔒 게임오버 또는 탈출 후에는 마우스 시점 이동 차단
+    if (player.isCaught || player.reachedGoal) {
+        return;
+    }
+
     if (firstMouse) {
         lastMouseX = x;
         lastMouseY = y;
@@ -253,9 +256,9 @@ void onMouseMove(int x, int y) {
     player.angleY += xOffset;
     player.angleX += yOffset;
 
-    if (player.angleX > 89.0f) player.angleX = 89.0f;
+    if (player.angleX > 89.0f)  player.angleX = 89.0f;
     if (player.angleX < -89.0f) player.angleX = -89.0f;
 
     if (player.angleY > 360.0f) player.angleY -= 360.0f;
-    if (player.angleY < 0.0f) player.angleY += 360.0f;
+    if (player.angleY < 0.0f)   player.angleY += 360.0f;
 }

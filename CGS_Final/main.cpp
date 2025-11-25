@@ -1,13 +1,29 @@
 ﻿#include <GL/glut.h>
 #include <iostream>
+#include <string>
 #include "maze.h"
 #include "player.h"
 #include "collision.h"
-#include "tagger.h"  // 술래 추가
+#include "tagger.h"
 
 int lastTime = 0;
 int windowWidth = 1280;
 int windowHeight = 720;
+
+void drawCenteredText(const std::string& text, float y, void* font = GLUT_BITMAP_HELVETICA_18) {
+    int textWidth = 0;
+    for (char c : text) {
+        textWidth += glutBitmapWidth(font, c);
+    }
+
+    float x = (windowWidth - textWidth) / 2.0f;
+
+    glRasterPos2f(x, y);
+
+    for (char c : text) {
+        glutBitmapCharacter(font, c);
+    }
+}
 
 void initOpenGL() {
     glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
@@ -41,12 +57,44 @@ void initOpenGL() {
     std::cout << "OpenGL initialized successfully" << std::endl;
 }
 
+void renderGameOverScreen() {
+    glClearColor(0, 0, 0, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, windowWidth, 0, windowHeight);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    if (player.isCaught) {
+        drawCenteredText("GAME OVER", windowHeight * 0.55f, GLUT_BITMAP_TIMES_ROMAN_24);
+        drawCenteredText("You were caught by the Tagger", windowHeight * 0.45f);
+    }
+    else if (player.reachedGoal) {
+        drawCenteredText("CONGRATULATIONS!", windowHeight * 0.55f, GLUT_BITMAP_TIMES_ROMAN_24);
+        drawCenteredText("YOU ESCAPED!", windowHeight * 0.45f);
+    }
+
+    drawCenteredText("Press ESC to exit", windowHeight * 0.30f);
+
+    glutSwapBuffers();
+}
+
 void render() {
+
+    if (player.isCaught || player.reachedGoal) {
+        renderGameOverScreen();
+        return;
+    }
+
+    glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     setupCamera();
     drawMaze();
-    drawTagger();  // 술래 렌더링 추가
+    drawTagger();
 
     glutSwapBuffers();
 }
@@ -57,7 +105,7 @@ void update() {
     lastTime = currentTime;
 
     updatePlayer(deltaTime);
-    updateTagger(deltaTime);  // 술래 업데이트 추가
+    updateTagger(deltaTime);
 
     glutPostRedisplay();
 }
@@ -86,15 +134,10 @@ void printInstructions() {
     std::cout << "  MOUSE - Look around" << std::endl;
     std::cout << "  ESC - Exit" << std::endl;
     std::cout << "\nObjective:" << std::endl;
-    std::cout << "  1. Collect all 3 keys:" << std::endl;
-    std::cout << "     - RED Key" << std::endl;
-    std::cout << "     - BLUE Key" << std::endl;
-    std::cout << "     - YELLOW Key" << std::endl;
+    std::cout << "  1. Collect all 3 keys" << std::endl;
     std::cout << "  2. Reach the EXIT!" << std::endl;
-    std::cout << "\n  WARNING:" << std::endl;
+    std::cout << "\nWARNING:" << std::endl;
     std::cout << "  The RED TAGGER is hunting you!" << std::endl;
-    std::cout << "  If it catches you = GAME OVER!" << std::endl;
-    std::cout << "  The tagger uses A* pathfinding to chase you!" << std::endl;
     std::cout << "============================================\n" << std::endl;
 }
 
@@ -114,7 +157,7 @@ int main(int argc, char** argv) {
 
     buildCollisionMap();
     initPlayer();
-    initTagger();  // 술래 초기화 추가
+    initTagger();
 
     glutDisplayFunc(render);
     glutIdleFunc(update);
@@ -131,6 +174,5 @@ int main(int argc, char** argv) {
     glutWarpPointer(windowWidth / 2, windowHeight / 2);
 
     glutMainLoop();
-
     return 0;
 }

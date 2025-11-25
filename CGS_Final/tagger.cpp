@@ -1,4 +1,4 @@
-#include "tagger.h"
+﻿#include "tagger.h"
 #include "maze.h"
 #include "collision.h"
 #include "player.h"
@@ -9,11 +9,11 @@
 #include <limits>
 #include <iostream>
 
-// ���� ���� ��ü
+// 전역 술래 객체
 Tagger tagger;
 
 // =============================
-// ��ǥ ��ȯ �����
+// 좌표 변환 도우미
 // =============================
 static void worldToTile(float worldX, float worldZ, int& tileX, int& tileZ) {
     tileX = (int)((worldX + (MAZE_ROWS * CELL_SIZE) / 2.0f) / CELL_SIZE);
@@ -31,14 +31,14 @@ static void tileToWorld(int tileX, int tileZ, float& worldX, float& worldZ) {
 }
 
 // =============================
-// �޸���ƽ (����ư �Ÿ�)
+// 휴리스틱 (맨해튼 거리)
 // =============================
 float heuristic(int x1, int z1, int x2, int z2) {
     return static_cast<float>(std::abs(x1 - x2) + std::abs(z1 - z2));
 }
 
 // =============================
-// �����丵�� A* findPath
+// 리팩토링된 A* findPath
 // =============================
 std::vector<PathNode*> findPath(int startX, int startZ, int goalX, int goalZ) {
     std::vector<PathNode*> path;
@@ -56,7 +56,7 @@ std::vector<PathNode*> findPath(int startX, int startZ, int goalX, int goalZ) {
 
     const float INF = std::numeric_limits<float>::infinity();
 
-    // Ÿ�� ���� ����
+    // 타일 정보 구조체
     struct CellInfo {
         float g;
         float h;
@@ -79,7 +79,6 @@ std::vector<PathNode*> findPath(int startX, int startZ, int goalX, int goalZ) {
         }
     }
 
-    // �켱����ť ���
     struct PQNode {
         int x, z;
         float f;
@@ -93,7 +92,6 @@ std::vector<PathNode*> findPath(int startX, int startZ, int goalX, int goalZ) {
 
     info[startX][startZ].g = 0.0f;
     info[startX][startZ].h = heuristic(startX, startZ, goalX, goalZ);
-
     openList.push({ startX, startZ, info[startX][startZ].g + info[startX][startZ].h });
     info[startX][startZ].inOpen = true;
 
@@ -102,15 +100,12 @@ std::vector<PathNode*> findPath(int startX, int startZ, int goalX, int goalZ) {
 
     bool found = false;
 
-    // =============================
-    //      A* MAIN LOOP
-    // =============================
     while (!openList.empty()) {
-        PQNode current = openList.top();
+        PQNode cur = openList.top();
         openList.pop();
 
-        int cx = current.x;
-        int cz = current.z;
+        int cx = cur.x;
+        int cz = cur.z;
 
         if (info[cx][cz].inClosed) continue;
         info[cx][cz].inClosed = true;
@@ -120,9 +115,9 @@ std::vector<PathNode*> findPath(int startX, int startZ, int goalX, int goalZ) {
             break;
         }
 
-        for (int dir = 0; dir < 4; ++dir) {
-            int nx = cx + dx[dir];
-            int nz = cz + dz[dir];
+        for (int i = 0; i < 4; i++) {
+            int nx = cx + dx[i];
+            int nz = cz + dz[i];
 
             if (nx < 0 || nx >= MAZE_ROWS || nz < 0 || nz >= MAZE_COLS)
                 continue;
@@ -148,13 +143,7 @@ std::vector<PathNode*> findPath(int startX, int startZ, int goalX, int goalZ) {
         }
     }
 
-    if (!found) {
-        return path;
-    }
-
-    // =============================
-    //    ��� ������ �� PathNode�� ����
-    // =============================
+    if (!found) return path;
 
     int x = goalX;
     int z = goalZ;
@@ -177,21 +166,20 @@ std::vector<PathNode*> findPath(int startX, int startZ, int goalX, int goalZ) {
 }
 
 // =============================
-// �޸� ����
+// 메모리 해제
 // =============================
 void clearPath(std::vector<PathNode*>& path) {
-    for (PathNode* node : path) {
-        delete node;
-    }
+    for (PathNode* n : path) delete n;
     path.clear();
 }
 
 // =============================
-// ���� �ʱ�ȭ
+// 술래 초기화
 // =============================
 void initTagger() {
     bool found = false;
 
+    // 맨 아래쪽 / 오른쪽 영역부터 탐색
     for (int i = MAZE_ROWS - 2; i >= 1 && !found; i--) {
         for (int j = MAZE_COLS - 2; j >= 1 && !found; j--) {
             if (MAZE[i][j] == TILE_EMPTY) {
@@ -232,15 +220,16 @@ void initTagger() {
 }
 
 // =============================
-//     ���� ������Ʈ (������)
+// 술래 업데이트 (개선본)
 // =============================
 void updateTagger(float deltaTime) {
     if (!tagger.isActive) return;
+
+    // ⛔ 게임오버 또는 클리어 상태에서는 술래도 정지
     if (player.isCaught || player.reachedGoal) return;
 
     int playerTileX, playerTileZ;
     worldToTile(player.x, player.z, playerTileX, playerTileZ);
-
     worldToTile(tagger.x, tagger.z, tagger.tileX, tagger.tileZ);
 
     tagger.pathUpdateTimer += deltaTime;
@@ -278,7 +267,7 @@ void updateTagger(float deltaTime) {
     float dz = tagger.targetZ - tagger.z;
     float dist = std::sqrt(dx * dx + dz * dz);
 
-    if (dist > 0.001f) {
+    if (dist > 0.0001f) {
         dx /= dist;
         dz /= dist;
 
@@ -335,28 +324,41 @@ void updateTagger(float deltaTime) {
 }
 
 // =============================
-// ���� ������
+// 술래 렌더링 (임시 모델)
 // =============================
 void drawTagger() {
     if (!tagger.isActive) return;
 
+    glPushMatrix();
+    glTranslatef(tagger.x, tagger.y, tagger.z);
+
+    // =============================
+    //  ⭐ 여기서부터가 "술래 모델링 교체 지점"
+    // =============================
+    //
+    // 1. 나중에 FBX / OBJ 모델을 사용한다면,
+    //    glRotatef(taggerFacingAngle, 0,1,0);  // 이동 방향을 바라보게
+    //    glScalef(...);  // 모델 크기 조절
+    //    drawYourTaggerModelMesh();  // 파일로부터 로드한 3D 모델 렌더
+    //
+    // 2. 아래 임시 구체는 나중에 완전히 삭제하고 모델 렌더 함수로 교체 가능
+    // =============================
+
+    // --- 몸체 (임시 구체) ---
     GLfloat amb[] = { 0.5f, 0.0f, 0.0f, 1.0f };
     GLfloat diff[] = { 1.0f, 0.0f, 0.0f, 1.0f };
     GLfloat spec[] = { 1.0f, 0.2f, 0.2f, 1.0f };
-
     glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diff);
     glMaterialfv(GL_FRONT, GL_SPECULAR, spec);
     glMaterialf(GL_FRONT, GL_SHININESS, 50.0f);
 
-    glPushMatrix();
-    glTranslatef(tagger.x, tagger.y, tagger.z);
-
     glutSolidSphere(PLAYER_RADIUS, 16, 16);
 
-    GLfloat eyeA[] = { 1, 1, 1, 1 };
-    glMaterialfv(GL_FRONT, GL_AMBIENT, eyeA);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, eyeA);
+    // --- 눈 (임시) ---
+    GLfloat white[] = { 1,1,1,1 };
+    glMaterialfv(GL_FRONT, GL_AMBIENT, white);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
 
     glPushMatrix();
     glTranslatef(-0.15f, 0.1f, 0.3f);
@@ -368,9 +370,16 @@ void drawTagger() {
     glutSolidSphere(0.08f, 8, 8);
     glPopMatrix();
 
+    // =============================
+    //  ⭐ 여기까지가 모델 교체 블록
+    // =============================
+
     glPopMatrix();
 }
 
+// =============================
+// 플레이어 잡기 판정
+// =============================
 bool checkTaggerCatch(float playerX, float playerZ) {
     if (!tagger.isActive) return false;
 
@@ -380,4 +389,3 @@ bool checkTaggerCatch(float playerX, float playerZ) {
 
     return d < tagger.catchRadius;
 }
-     
