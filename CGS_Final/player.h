@@ -16,7 +16,8 @@ struct Player {
     bool hasYellowKey;
 
     bool reachedGoal;
-    bool goalActivated;  // 출구 활성화 여부
+    bool goalActivated;
+    bool isCaught;  // 술래에게 잡혔는지 여부 (추가)
 };
 
 // 전역 플레이어 객체

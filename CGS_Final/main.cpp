@@ -1,12 +1,30 @@
 ﻿#include <GL/glut.h>
 #include <iostream>
+#include <string>
 #include "maze.h"
 #include "player.h"
 #include "collision.h"
+#include "tagger.h"
+
 
 int lastTime = 0;
 int windowWidth = 1280;
 int windowHeight = 720;
+
+void drawCenteredText(const std::string& text, float y, void* font = GLUT_BITMAP_HELVETICA_18) {
+    int textWidth = 0;
+    for (char c : text) {
+        textWidth += glutBitmapWidth(font, c);
+    }
+
+    float x = (windowWidth - textWidth) / 2.0f;
+
+    glRasterPos2f(x, y);
+
+    for (char c : text) {
+        glutBitmapCharacter(font, c);
+    }
+}
 
 void initOpenGL() {
     glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
@@ -35,16 +53,54 @@ void initOpenGL() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+
     glutSetCursor(GLUT_CURSOR_NONE);
 
     std::cout << "OpenGL initialized successfully" << std::endl;
 }
 
+void renderGameOverScreen() {
+    glClearColor(0, 0, 0, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, windowWidth, 0, windowHeight);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    if (player.isCaught) {
+        drawCenteredText("GAME OVER", windowHeight * 0.55f, GLUT_BITMAP_TIMES_ROMAN_24);
+        drawCenteredText("You were caught by the Tagger", windowHeight * 0.45f);
+    }
+    else if (player.reachedGoal) {
+        drawCenteredText("CONGRATULATIONS!", windowHeight * 0.55f, GLUT_BITMAP_TIMES_ROMAN_24);
+        drawCenteredText("YOU ESCAPED!", windowHeight * 0.45f);
+    }
+
+    drawCenteredText("Press ESC to exit", windowHeight * 0.30f);
+
+    glutSwapBuffers();
+}
+
 void render() {
+
+    if (player.isCaught || player.reachedGoal) {
+        renderGameOverScreen();
+        return;
+    }
+
+    glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     setupCamera();
     drawMaze();
+    drawTagger();
 
     glutSwapBuffers();
 }
@@ -55,6 +111,7 @@ void update() {
     lastTime = currentTime;
 
     updatePlayer(deltaTime);
+    updateTagger(deltaTime);
 
     glutPostRedisplay();
 }
@@ -75,20 +132,19 @@ void reshape(int width, int height) {
 }
 
 void printInstructions() {
-    std::cout << "\n====================================" << std::endl;
-    std::cout << "  OpenGL Maze Game - Key Collection" << std::endl;
-    std::cout << "====================================" << std::endl;
+    std::cout << "\n============================================" << std::endl;
+    std::cout << "  OpenGL Maze Game - Tag Game (술래잡기)" << std::endl;
+    std::cout << "============================================" << std::endl;
     std::cout << "\nControls:" << std::endl;
     std::cout << "  W/A/S/D or Arrow Keys - Move" << std::endl;
     std::cout << "  MOUSE - Look around" << std::endl;
     std::cout << "  ESC - Exit" << std::endl;
     std::cout << "\nObjective:" << std::endl;
-    std::cout << "  Collect all 3 keys:" << std::endl;
-    std::cout << "    - RED Key" << std::endl;
-    std::cout << "    - BLUE Key" << std::endl;
-    std::cout << "    - YELLOW Key" << std::endl;
-    std::cout << "  Then reach the EXIT!" << std::endl;
-    std::cout << "===================================\n" << std::endl;
+    std::cout << "  1. Collect all 3 keys" << std::endl;
+    std::cout << "  2. Reach the EXIT!" << std::endl;
+    std::cout << "\nWARNING:" << std::endl;
+    std::cout << "  The RED TAGGER is hunting you!" << std::endl;
+    std::cout << "============================================\n" << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -96,7 +152,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowSize(windowWidth, windowHeight);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("OpenGL Maze - Key Collection Game");
+    glutCreateWindow("OpenGL Maze - Tag Game");
 
     initOpenGL();
 
@@ -105,10 +161,14 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    if (!initMazeTextures()) {
+        std::cerr << "Failed to init maze textures!" << std::endl;
+    }
+
     buildCollisionMap();
     initPlayer();
+    initTagger();
 
-    // 콜백 등록
     glutDisplayFunc(render);
     glutIdleFunc(update);
     glutReshapeFunc(reshape);
@@ -124,6 +184,5 @@ int main(int argc, char** argv) {
     glutWarpPointer(windowWidth / 2, windowHeight / 2);
 
     glutMainLoop();
-
     return 0;
 }

@@ -1,7 +1,104 @@
-#include "maze.h"
+ï»¿#include "maze.h"
 #include "player.h"
 #include <GL/glut.h>
 #include <cmath>
+#include <vector>
+#include <iostream>
+#include <direct.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+static std::vector<GLuint> g_mazeTextures;
+static int g_currentMazeTex = -1;
+
+
+GLuint loadTextureFromFile(const char* filename)
+{
+    int width, height, channels;
+
+    stbi_set_flip_vertically_on_load(true);
+
+    unsigned char* data = stbi_load(filename, &width, &height, &channels, 0);
+    if (!data) {
+        std::cerr << "Failed to load texture image: " << filename << std::endl;
+        return 0;
+    }
+
+    std::cout << "Loaded texture: " << filename
+        << " (" << width << "x" << height
+        << ", channels=" << channels << ")\n";
+
+    GLenum format;
+    if (channels == 3) {
+        format = GL_RGB;
+    }
+    else if (channels == 4) {
+        format = GL_RGBA;
+    }
+    else {
+        std::cerr << "Unsupported channel count (" << channels
+            << ") in texture: " << filename << std::endl;
+        stbi_image_free(data);
+        return 0;
+    }
+
+    GLuint texId;
+    glGenTextures(1, &texId);
+    glBindTexture(GL_TEXTURE_2D, texId);
+
+    // ðŸ”¹ mipmap ì•ˆ ì“°ëŠ” ì¼ë°˜ í•„í„° (ì´ê²Œ ì¤‘ìš”!)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        format,           // ë‚´ë¶€ í¬ë§·
+        width,
+        height,
+        0,
+        format,           // ìž…ë ¥ ë°ì´í„° í¬ë§·
+        GL_UNSIGNED_BYTE,
+        data
+    );
+
+    stbi_image_free(data);
+    return texId;
+}
+
+bool initMazeTextures() {
+    g_mazeTextures.clear();
+    g_mazeTextures.push_back(loadTextureFromFile("textures/wall1.jpg"));
+    g_mazeTextures.push_back(loadTextureFromFile("textures/wall2.jpg"));
+    g_mazeTextures.push_back(loadTextureFromFile("textures/wall3.jpg"));
+
+    for (int i = 0; i < (int)g_mazeTextures.size(); ++i) {
+        if (g_mazeTextures[i] == 0) {
+            std::cerr << "Texture " << i << " failed to load." << std::endl;
+            return false;
+        }
+    }
+
+    g_currentMazeTex = 0;
+    std::cout << "Maze textures initialized (image files). Count: "
+        << g_mazeTextures.size() << std::endl;
+    return true;
+}
+
+
+void setMazeTexture(int idx) {
+    if (idx < 0 || idx >= (int)g_mazeTextures.size()) return;
+    g_currentMazeTex = idx;
+}
+
+void nextMazeTexture() {
+    if (g_mazeTextures.empty()) return;
+    g_currentMazeTex = (g_currentMazeTex + 1) % g_mazeTextures.size();
+}
+
 
 void drawWall() {
     GLfloat wall_ambient[] = { 0.3f, 0.3f, 0.3f, 1.0f };
@@ -16,53 +113,64 @@ void drawWall() {
     float w = CELL_SIZE / 2.0f;
     float h = WALL_HEIGHT;
 
+    if (g_currentMazeTex >= 0 && g_currentMazeTex < (int)g_mazeTextures.size()) {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, g_mazeTextures[g_currentMazeTex]);
+    }
+    else {
+        glDisable(GL_TEXTURE_2D);
+    }
+
+
     glBegin(GL_QUADS);
 
-    // ¾Õ¸é
+    // ì•žë©´
     glNormal3f(0, 0, 1);
-    glVertex3f(-w, 0, w);
-    glVertex3f(w, 0, w);
-    glVertex3f(w, h, w);
-    glVertex3f(-w, h, w);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, 0, w);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(w, 0, w);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(w, h, w);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-w, h, w);
 
-    // µÞ¸é
+    // ë’·ë©´
     glNormal3f(0, 0, -1);
-    glVertex3f(-w, 0, -w);
-    glVertex3f(-w, h, -w);
-    glVertex3f(w, h, -w);
-    glVertex3f(w, 0, -w);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, 0, -w);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(w, 0, -w);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(w, h, -w);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-w, h, -w);
 
-    // ¿ÞÂÊ¸é
+    // ì™¼ìª½ë©´
     glNormal3f(-1, 0, 0);
-    glVertex3f(-w, 0, -w);
-    glVertex3f(-w, 0, w);
-    glVertex3f(-w, h, w);
-    glVertex3f(-w, h, -w);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, 0, -w);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(-w, 0, w);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(-w, h, w);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-w, h, -w);
 
-    // ¿À¸¥ÂÊ¸é
+    // ì˜¤ë¥¸ìª½ë©´
     glNormal3f(1, 0, 0);
-    glVertex3f(w, 0, -w);
-    glVertex3f(w, h, -w);
-    glVertex3f(w, h, w);
-    glVertex3f(w, 0, w);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(w, 0, -w);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(w, 0, w);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(w, h, w);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(w, h, -w);
 
-    // À­¸é
+    // ìœ—ë©´
     glNormal3f(0, 1, 0);
-    glVertex3f(-w, h, -w);
-    glVertex3f(-w, h, w);
-    glVertex3f(w, h, w);
-    glVertex3f(w, h, -w);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, h, -w);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(w, h, -w);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(w, h, w);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-w, h, w);
 
-    // ¾Æ·§¸é
+    // ì•„ëž«ë©´
     glNormal3f(0, -1, 0);
-    glVertex3f(-w, 0, -w);
-    glVertex3f(w, 0, -w);
-    glVertex3f(w, 0, w);
-    glVertex3f(-w, 0, w);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-w, 0, -w);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(w, 0, -w);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(w, 0, w);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-w, 0, w);
 
     glEnd();
 
-    // ¸ð¼­¸® °­Á¶¼±
+    glDisable(GL_TEXTURE_2D);
+
+    // ëª¨ì„œë¦¬ ê°•ì¡°ì„ 
     glDisable(GL_LIGHTING);
     glColor3f(0.1f, 0.1f, 0.15f);
     glLineWidth(2.0f);
@@ -109,7 +217,7 @@ void drawFloorTile() {
 void drawRedKey() {
     drawFloorTile();
 
-    // »¡°£»ö ¿­¼è
+    // ë¹¨ê°„ìƒ‰ ì—´ì‡ 
     GLfloat key_ambient[] = { 0.5f, 0.0f, 0.0f, 1.0f };
     GLfloat key_diffuse[] = { 0.9f, 0.1f, 0.1f, 1.0f };
     GLfloat key_specular[] = { 1.0f, 0.3f, 0.3f, 1.0f };
@@ -129,7 +237,7 @@ void drawRedKey() {
 void drawBlueKey() {
     drawFloorTile();
 
-    // ÆÄ¶õ»ö ¿­¼è
+    // íŒŒëž€ìƒ‰ ì—´ì‡ 
     GLfloat key_ambient[] = { 0.0f, 0.0f, 0.5f, 1.0f };
     GLfloat key_diffuse[] = { 0.1f, 0.1f, 0.9f, 1.0f };
     GLfloat key_specular[] = { 0.3f, 0.3f, 1.0f, 1.0f };
@@ -149,7 +257,7 @@ void drawBlueKey() {
 void drawYellowKey() {
     drawFloorTile();
 
-    // ³ë¶õ»ö ¿­¼è
+    // ë…¸ëž€ìƒ‰ ì—´ì‡ 
     GLfloat key_ambient[] = { 0.5f, 0.5f, 0.0f, 1.0f };
     GLfloat key_diffuse[] = { 0.9f, 0.9f, 0.1f, 1.0f };
     GLfloat key_specular[] = { 1.0f, 1.0f, 0.3f, 1.0f };
@@ -169,17 +277,17 @@ void drawYellowKey() {
 void drawGoal(bool activated) {
     drawFloorTile();
 
-    // È°¼ºÈ­ »óÅÂ¿¡ µû¶ó »ö»ó º¯°æ
+    // í™œì„±í™” ìƒíƒœì— ë”°ë¼ ìƒ‰ìƒ ë³€ê²½
     GLfloat goal_ambient[4], goal_diffuse[4], goal_specular[4];
 
     if (activated) {
-        // È°¼ºÈ­: ¹àÀº ÃÊ·Ï»ö
+        // í™œì„±í™”: ë°ì€ ì´ˆë¡ìƒ‰
         goal_ambient[0] = 0.0f; goal_ambient[1] = 0.5f; goal_ambient[2] = 0.0f; goal_ambient[3] = 1.0f;
         goal_diffuse[0] = 0.0f; goal_diffuse[1] = 1.0f; goal_diffuse[2] = 0.0f; goal_diffuse[3] = 1.0f;
         goal_specular[0] = 0.3f; goal_specular[1] = 1.0f; goal_specular[2] = 0.3f; goal_specular[3] = 1.0f;
     }
     else {
-        // ºñÈ°¼ºÈ­: ¾îµÎ¿î È¸»ö
+        // ë¹„í™œì„±í™”: ì–´ë‘ìš´ íšŒìƒ‰
         goal_ambient[0] = 0.2f; goal_ambient[1] = 0.2f; goal_ambient[2] = 0.2f; goal_ambient[3] = 1.0f;
         goal_diffuse[0] = 0.3f; goal_diffuse[1] = 0.3f; goal_diffuse[2] = 0.3f; goal_diffuse[3] = 1.0f;
         goal_specular[0] = 0.1f; goal_specular[1] = 0.1f; goal_specular[2] = 0.1f; goal_specular[3] = 1.0f;
@@ -194,7 +302,7 @@ void drawGoal(bool activated) {
     float height = 1.0f;
     int segments = 20;
 
-    // ¿ø±âµÕ ¿·¸é
+    // ì›ê¸°ë‘¥ ì˜†ë©´
     glBegin(GL_QUAD_STRIP);
     for (int i = 0; i <= segments; i++) {
         float angle = (2.0f * 3.14159265f * i) / segments;
@@ -207,7 +315,7 @@ void drawGoal(bool activated) {
     }
     glEnd();
 
-    // À­¸é
+    // ìœ—ë©´
     glBegin(GL_TRIANGLE_FAN);
     glNormal3f(0, 1, 0);
     glVertex3f(0, height, 0);
@@ -243,7 +351,7 @@ void drawMaze() {
                 drawYellowKey();
                 break;
             case TILE_GOAL:
-                drawGoal(player.goalActivated);  // È°¼ºÈ­ »óÅÂ Àü´Þ
+                drawGoal(player.goalActivated);  // í™œì„±í™” ìƒíƒœ ì „ë‹¬
                 break;
             case TILE_START:
             case TILE_EMPTY:

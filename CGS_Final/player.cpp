@@ -1,15 +1,14 @@
 ﻿#include "player.h"
 #include "collision.h"
 #include "maze.h"
+#include "tagger.h"  // 술래 체크를 위해 추가
 #include <GL/glut.h>
 #include <iostream>
 #include <cmath>
 
-// 전역 변수
 Player player;
 bool keyStates[256] = { false };
 
-// 마우스 상태
 int lastMouseX = 640;
 int lastMouseY = 360;
 bool firstMouse = true;
@@ -28,6 +27,7 @@ void initPlayer() {
 
     player.reachedGoal = false;
     player.goalActivated = false;
+    player.isCaught = false;  // 술래에게 잡힘 상태 초기화
 
     std::cout << "Player initialized at world position (" << player.x << ", " << player.z << ")" << std::endl;
 }
@@ -41,12 +41,12 @@ int getKeyCount() {
 }
 
 void updatePlayer(float deltaTime) {
-    if (player.reachedGoal) return;
+    // 게임 종료 상태면 이동 불가
+    if (player.reachedGoal || player.isCaught) return;
 
     float moveX = 0.0f;
     float moveZ = 0.0f;
 
-    // 키 상태에 따른 이동 방향
     if (keyStates['w'] || keyStates['W']) {
         moveZ -= 1.0f;
     }
@@ -60,10 +60,8 @@ void updatePlayer(float deltaTime) {
         moveX += 1.0f;
     }
 
-    // 대각선 이동 정규화
     normalize2D(moveX, moveZ);
 
-    // 카메라 방향 기준 이동
     float angleRad = player.angleY * 3.14159265f / 180.0f;
     float cosAngle = std::cos(angleRad);
     float sinAngle = std::sin(angleRad);
@@ -74,13 +72,11 @@ void updatePlayer(float deltaTime) {
     float nx = player.x + worldMoveX * player.speed;
     float nz = player.z + worldMoveZ * player.speed;
 
-    // 충돌 검사
     if (!checkCollision(nx, nz, PLAYER_RADIUS)) {
         player.x = nx;
         player.z = nz;
     }
     else {
-        // 슬라이딩 충돌
         if (!checkCollision(nx, player.z, PLAYER_RADIUS)) {
             player.x = nx;
         }
@@ -105,7 +101,6 @@ void updatePlayer(float deltaTime) {
         std::cout << "Keys: " << getKeyCount() << "/3" << std::endl;
     }
 
-    // 모든 열쇠를 모았는지 확인
     if (hasAllKeys() && !player.goalActivated) {
         player.goalActivated = true;
         std::cout << "\n========================================" << std::endl;
@@ -133,6 +128,19 @@ void updatePlayer(float deltaTime) {
                     << getKeyCount() << "/3)" << std::endl;
                 showedWarning = true;
             }
+        }
+    }
+
+    // 술래 충돌 체크
+    if (checkTaggerCatch(player.x, player.z)) {
+        if (!player.isCaught) {
+            player.isCaught = true;
+            std::cout << "\n========================================" << std::endl;
+            std::cout << "  GAME OVER!" << std::endl;
+            std::cout << "  술래에게 잡혔습니다!" << std::endl;
+            std::cout << "  You were caught by the tagger!" << std::endl;
+            std::cout << "  Press ESC to exit" << std::endl;
+            std::cout << "========================================\n" << std::endl;
         }
     }
 }
@@ -186,6 +194,22 @@ void onKeyPress(unsigned char key, int x, int y) {
         std::cout << "Exiting..." << std::endl;
         exit(0);
     }
+
+    if (key == '1') {
+        std::cout << "[key] 1 pressed" << std::endl;
+        setMazeTexture(0);
+    }
+
+    if (key == '2') {
+        std::cout << "[key] 2 pressed" << std::endl;
+        setMazeTexture(1);
+    }
+
+    if (key == '3') {
+        std::cout << "[key] 3 pressed" << std::endl;
+        setMazeTexture(2);
+    }
+
 }
 
 void onKeyRelease(unsigned char key, int x, int y) {
@@ -227,6 +251,11 @@ void onSpecialKeyRelease(int key, int x, int y) {
 }
 
 void onMouseMove(int x, int y) {
+    // 🔒 게임오버 또는 탈출 후에는 마우스 시점 이동 차단
+    if (player.isCaught || player.reachedGoal) {
+        return;
+    }
+
     if (firstMouse) {
         lastMouseX = x;
         lastMouseY = y;
@@ -243,9 +272,9 @@ void onMouseMove(int x, int y) {
     player.angleY += xOffset;
     player.angleX += yOffset;
 
-    if (player.angleX > 89.0f) player.angleX = 89.0f;
+    if (player.angleX > 89.0f)  player.angleX = 89.0f;
     if (player.angleX < -89.0f) player.angleX = -89.0f;
 
     if (player.angleY > 360.0f) player.angleY -= 360.0f;
-    if (player.angleY < 0.0f) player.angleY += 360.0f;
+    if (player.angleY < 0.0f)   player.angleY += 360.0f;
 }

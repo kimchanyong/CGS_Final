@@ -9,8 +9,8 @@ const float CELL_SIZE = 2.0f;
 const float WALL_HEIGHT = 2.5f;
 const float PLAYER_RADIUS = 0.4f;
 const float PLAYER_HEIGHT = 1.8f;
-const float MOVE_SPEED = 0.07f;
-const float MOUSE_SENSITIVITY = 0.3f;
+const float MOVE_SPEED = 0.08f;
+const float MOUSE_SENSITIVITY = 0.4f;
 
 // 수학 유틸리티
 inline float clamp(float value, float min, float max) {
