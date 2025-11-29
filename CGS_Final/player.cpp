@@ -194,6 +194,22 @@ void onKeyPress(unsigned char key, int x, int y) {
         std::cout << "Exiting..." << std::endl;
         exit(0);
     }
+
+    if (key == '1') {
+        std::cout << "[key] 1 pressed" << std::endl;
+        setMazeTexture(0);
+    }
+
+    if (key == '2') {
+        std::cout << "[key] 2 pressed" << std::endl;
+        setMazeTexture(1);
+    }
+
+    if (key == '3') {
+        std::cout << "[key] 3 pressed" << std::endl;
+        setMazeTexture(2);
+    }
+
 }
 
 void onKeyRelease(unsigned char key, int x, int y) {

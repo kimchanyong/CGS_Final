@@ -24,6 +24,10 @@ bool loadMaze(const char* filename);
 void getStartPosition(float& x, float& z);
 void getGoalPosition(float& x, float& z);
 
+bool initMazeTextures();
+void setMazeTexture(int idx);
+void nextMazeTexture();
+
 // 미로 렌더링 함수
 void drawMaze();
 void drawWall();

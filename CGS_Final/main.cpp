@@ -57,6 +57,9 @@ void initOpenGL() {
     goblet2Mesh.LoadSOR("goblet2.txt");
     goblet3Mesh.LoadSOR("goblet3.txt");
 
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
     glutSetCursor(GLUT_CURSOR_NONE);
 
     std::cout << "OpenGL initialized successfully" << std::endl;
@@ -158,6 +161,10 @@ int main(int argc, char** argv) {
     if (!loadMaze("maze.txt")) {
         std::cerr << "Failed to load maze!" << std::endl;
         return 1;
+    }
+
+    if (!initMazeTextures()) {
+        std::cerr << "Failed to init maze textures!" << std::endl;
     }
 
     buildCollisionMap();
