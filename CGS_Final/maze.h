@@ -1,25 +1,39 @@
-#ifndef MAZE_H
+ï»¿#ifndef MAZE_H
 #define MAZE_H
 
 #include "util.h"
+#include <GL/glut.h> 
 
-// ¹Ì·Î µ¥ÀÌÅÍ
+struct Material {
+    float ambient[4];
+    float diffuse[4];
+    float specular[4];
+    float shininess;
+
+};
+
+// ë¯¸ë¡œ ë°ì´í„°
 extern int MAZE[MAX_MAZE_SIZE][MAX_MAZE_SIZE];
 extern int MAZE_ROWS;
 extern int MAZE_COLS;
+extern Material g_wallMaterials[3];
+extern int g_currentWallMaterial;
 
-// ¹Ì·Î Å¸ÀÏ Å¸ÀÔ
+// ë¯¸ë¡œ íƒ€ì¼ íƒ€ì…
 enum TileType {
-    TILE_GOAL = -2,         // Å»Ãâ ÁöÁ¡
-    TILE_START = -1,        // Ãâ¹ß ÁöÁ¡
-    TILE_EMPTY = 0,         // ºó °ø°£ (¼ú·¡ ½ºÆù °¡´É)
-    TILE_WALL = 1,          // º® (Åë°ú ºÒ°¡)
-    TILE_RED_KEY = 2,       // »¡°£ ¿­¼è
-    TILE_BLUE_KEY = 3,      // ÆÄ¶õ ¿­¼è
-    TILE_YELLOW_KEY = 4     // ³ë¶õ ¿­¼è
+    TILE_GOAL = -2,   // íƒˆì¶œ ì§€ì 
+    TILE_START = -1,   // ì¶œë°œ ì§€ì 
+    TILE_EMPTY = 0,    // ë¹ˆ ê³µê°„
+    TILE_WALL = 1,    // ë²½
+    TILE_RED_KEY = 2,    // ë¹¨ê°„ ì—´ì‡ 
+    TILE_BLUE_KEY = 3,    // íŒŒë€ ì—´ì‡ 
+    TILE_YELLOW_KEY = 4,    // ë…¸ë€ ì—´ì‡ 
+    TILE_PANEL_WALL = 5,    // ğŸ”¹ íŠ¹ë³„í•œ ì¥ì‹ ë²½ (ì—¬ê¸° ì¶”ê°€)
+    TILE_LAMP = 6      // ì „ë“±
 };
 
-// ¹Ì·Î ·Îµù ÇÔ¼ö
+
+// ë¯¸ë¡œ ë¡œë”© í•¨ìˆ˜
 bool loadMaze(const char* filename);
 void getStartPosition(float& x, float& z);
 void getGoalPosition(float& x, float& z);
@@ -28,7 +42,7 @@ bool initMazeTextures();
 void setMazeTexture(int idx);
 void nextMazeTexture();
 
-// ¹Ì·Î ·»´õ¸µ ÇÔ¼ö
+// ë¯¸ë¡œ ë Œë”ë§ í•¨ìˆ˜
 void drawMaze();
 void drawWall();
 void drawFloorTile();
@@ -36,5 +50,12 @@ void drawRedKey();
 void drawBlueKey();
 void drawYellowKey();
 void drawGoal(bool activated);
+
+void drawLamp();
+void setupLamps();
+
+void applyMaterial(const Material& m);
+
+bool initWallShader();
 
 #endif

@@ -76,13 +76,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\황하린\Desktop\CG\CGS_Final\freeglut-3.2.1_artech\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\황하린\Desktop\CG\CGS_Final\freeglut-3.2.1_artech\include;C:\Users\황하린\Desktop\CG\CGS_Final\glew-2.2.0\include;C:\Users\황하린\Desktop\CG\CGS_Final\SDL2_mixer-2.8.1\include;C:\Users\황하린\Desktop\CG\CGS_Final\SDL2-2.32.6\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\황하린\Desktop\CG\CGS_Final\freeglut-3.2.1_artech\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\황하린\Desktop\CG\CGS_Final\freeglut-3.2.1_artech\lib;C:\Users\황하린\Desktop\CG\CGS_Final\glew-2.2.0\lib\Release\Win32;C:\Users\황하린\Desktop\CG\CGS_Final\SDL2-2.32.6\lib\x86;C:\Users\황하린\Desktop\CG\CGS_Final\SDL2_mixer-2.8.1\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -132,6 +132,7 @@
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="maze_loader.cpp" />
     <ClCompile Include="maze_renderer.cpp" />
+    <ClCompile Include="model.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="tagger.cpp" />
     <ClCompile Include="util.cpp" />
@@ -139,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="collision.h" />
     <ClInclude Include="maze.h" />
+    <ClInclude Include="model.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="tagger.h" />

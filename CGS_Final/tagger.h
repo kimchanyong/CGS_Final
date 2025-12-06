@@ -1,67 +1,71 @@
-#ifndef TAGGER_H
+ï»¿#ifndef TAGGER_H
 #define TAGGER_H
 
 #include "util.h"
 #include <vector>
 
-// A* ¾Ë°í¸®Áò¿ë ³ëµå ±¸Á¶Ã¼
+// A* ì•Œê³ ë¦¬ì¦˜ìš© ë…¸ë“œ êµ¬ì¡°ì²´
 struct PathNode {
-    int x, z;              // ¹Ì·Î Å¸ÀÏ ÁÂÇ¥
-    float g;               // ½ÃÀÛÁ¡À¸·ÎºÎÅÍÀÇ ½ÇÁ¦ ºñ¿ë (G cost)
-    float h;               // ¸ñÇ¥±îÁöÀÇ ÃßÁ¤ ºñ¿ë (H cost - ÈŞ¸®½ºÆ½)
-    float f;               // ÃÑ ºñ¿ë (F = G + H)
-    PathNode* parent;      // °æ·Î ¿ªÃßÀû¿ë ºÎ¸ğ ³ëµå
+    int x, z;              // ë¯¸ë¡œ íƒ€ì¼ ì¢Œí‘œ
+    float g;               // ì‹œì‘ì ìœ¼ë¡œë¶€í„°ì˜ ì‹¤ì œ ë¹„ìš© (G cost)
+    float h;               // ëª©í‘œê¹Œì§€ì˜ ì¶”ì • ë¹„ìš© (H cost - íœ´ë¦¬ìŠ¤í‹±)
+    float f;               // ì´ ë¹„ìš© (F = G + H)
+    PathNode* parent;      // ê²½ë¡œ ì—­ì¶”ì ìš© ë¶€ëª¨ ë…¸ë“œ
 
     PathNode() : x(0), z(0), g(0), h(0), f(0), parent(nullptr) {}
     PathNode(int x, int z) : x(x), z(z), g(0), h(0), f(0), parent(nullptr) {}
 };
 
-// ¼ú·¡ ±¸Á¶Ã¼
+// ìˆ ë˜ êµ¬ì¡°ì²´
 struct Tagger {
-    // À§Ä¡ Á¤º¸
-    float x, y, z;         // ¿ùµå ÁÂÇ¥
-    int tileX, tileZ;      // ÇöÀç Å¸ÀÏ ÁÂÇ¥ (A* °æ·Î ÃßÀû¿ë)
+    // ìœ„ì¹˜ ì •ë³´
+    float x, y, z;         // ì›”ë“œ ì¢Œí‘œ
+    int tileX, tileZ;      // í˜„ì¬ íƒ€ì¼ ì¢Œí‘œ (A* ê²½ë¡œ ì¶”ì ìš©)
 
-    // ÀÌµ¿ Á¤º¸
-    float speed;           // ÀÌµ¿ ¼Óµµ (ÇÃ·¹ÀÌ¾îº¸´Ù ¾à°£ ´À¸²)
-    float targetX, targetZ; // ´ÙÀ½ ¸ñÇ¥ À§Ä¡ (¿ùµå ÁÂÇ¥)
+    // ì´ë™ ì •ë³´
+    float speed;           // ì´ë™ ì†ë„ (í”Œë ˆì´ì–´ë³´ë‹¤ ì•½ê°„ ëŠë¦¼)
+    float targetX, targetZ; // ë‹¤ìŒ ëª©í‘œ ìœ„ì¹˜ (ì›”ë“œ ì¢Œí‘œ)
 
-    // °æ·Î Á¤º¸
-    std::vector<PathNode*> path;  // A*·Î °è»êµÈ °æ·Î
-    int currentPathIndex;          // ÇöÀç °æ·Î»óÀÇ À§Ä¡
+    // ê²½ë¡œ ì •ë³´
+    std::vector<PathNode*> path;  // A*ë¡œ ê³„ì‚°ëœ ê²½ë¡œ
+    int currentPathIndex;          // í˜„ì¬ ê²½ë¡œìƒì˜ ìœ„ì¹˜
 
-    // ½Ã°£ Á¤º¸
-    float pathUpdateTimer;         // °æ·Î Àç°è»ê Å¸ÀÌ¸Ó
-    float pathUpdateInterval;      // °æ·Î Àç°è»ê ÁÖ±â (ÃÊ)
+    // ì‹œê°„ ì •ë³´
+    float pathUpdateTimer;         // ê²½ë¡œ ì¬ê³„ì‚° íƒ€ì´ë¨¸
+    float pathUpdateInterval;      // ê²½ë¡œ ì¬ê³„ì‚° ì£¼ê¸° (ì´ˆ)
 
-    // »óÅÂ Á¤º¸
-    bool isActive;                 // ¼ú·¡ È°¼ºÈ­ ¿©ºÎ
-    float detectionRadius;         // ÇÃ·¹ÀÌ¾î °¨Áö ¹üÀ§
-    float catchRadius;             // ÇÃ·¹ÀÌ¾î Àâ±â ¹üÀ§
+    // ìƒíƒœ ì •ë³´
+    bool isActive;                 // ìˆ ë˜ í™œì„±í™” ì—¬ë¶€
+    float detectionRadius;         // í”Œë ˆì´ì–´ ê°ì§€ ë²”ìœ„
+    float catchRadius;             // í”Œë ˆì´ì–´ ì¡ê¸° ë²”ìœ„
+
+    float facingAngle;             // ğŸ”¹ í˜„ì¬ ë°”ë¼ë³´ëŠ” Yì¶• ê°ë„(ë„ ë‹¨ìœ„)
 
     Tagger() : x(0), y(0), z(0), tileX(0), tileZ(0),
-        speed(0.06f),  // ÇÃ·¹ÀÌ¾î(0.08)º¸´Ù ´À¸²
+        speed(0.06f),  // í”Œë ˆì´ì–´(0.08)ë³´ë‹¤ ëŠë¦¼
         targetX(0), targetZ(0),
         currentPathIndex(0),
-        pathUpdateTimer(0), pathUpdateInterval(0.1f),  // 0.5ÃÊ¸¶´Ù Àç°è»ê
+        pathUpdateTimer(0), pathUpdateInterval(0.1f),  
         isActive(true),
-        detectionRadius(30.0f),  // 30À¯´Ö ³» ÇÃ·¹ÀÌ¾î °¨Áö
-        catchRadius(0.8f) {
-    }     // 0.8À¯´Ö ³»¿¡¼­ ÀâÈû
+        detectionRadius(30.0f),  
+        catchRadius(0.8f),
+        facingAngle(0.0f)        
+    {
+    }
 };
 
-// Àü¿ª ¼ú·¡ °´Ã¼
+// ì „ì—­ ìˆ ë˜ ê°ì²´
 extern Tagger tagger;
 
-// ¼ú·¡ °ü·Ã ÇÔ¼ö
-void initTagger();                                    // ¼ú·¡ ÃÊ±âÈ­ (0¹ø Å¸ÀÏ¿¡¼­¸¸ ½ºÆù)
-void updateTagger(float deltaTime);                   // ¼ú·¡ ¾÷µ¥ÀÌÆ®
-void drawTagger();                                    // ¼ú·¡ ·»´õ¸µ
-bool checkTaggerCatch(float playerX, float playerZ);  // ÇÃ·¹ÀÌ¾î Àâ±â Ã¼Å©
+// ìˆ ë˜ ê´€ë ¨ í•¨ìˆ˜
+void initTagger();                                    // ìˆ ë˜ ì´ˆê¸°í™” (0ë²ˆ íƒ€ì¼ì—ì„œë§Œ ìŠ¤í°)
+void updateTagger(float deltaTime);                   // ìˆ ë˜ ì—…ë°ì´íŠ¸
+void drawTagger();                                    // ìˆ ë˜ ë Œë”ë§
+bool checkTaggerCatch(float playerX, float playerZ);  // í”Œë ˆì´ì–´ ì¡ê¸° ì²´í¬
 
-// A* ¾Ë°í¸®Áò ÇÔ¼ö
-std::vector<PathNode*> findPath(int startX, int startZ, int goalX, int goalZ);  // A* °æ·Î Å½»ö
-float heuristic(int x1, int z1, int x2, int z2);     // ÈŞ¸®½ºÆ½ ÇÔ¼ö (¸ÇÇØÆ° °Å¸®)
-void clearPath(std::vector<PathNode*>& path);         // °æ·Î ¸Ş¸ğ¸® ÇØÁ¦
+// A* ì•Œê³ ë¦¬ì¦˜ í•¨ìˆ˜
+std::vector<PathNode*> findPath(int startX, int startZ, int goalX, int goalZ);  // A* ê²½ë¡œ íƒìƒ‰
+float heuristic(int x1, int z1, int x2, int z2);     // íœ´ë¦¬ìŠ¤í‹± í•¨ìˆ˜ (ë§¨í•´íŠ¼ ê±°ë¦¬)
+void clearPath(std::vector<PathNode*>& path);         // ê²½ë¡œ ë©”ëª¨ë¦¬ í•´ì œ
 
 #endif

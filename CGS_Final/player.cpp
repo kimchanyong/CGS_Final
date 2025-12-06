@@ -210,6 +210,19 @@ void onKeyPress(unsigned char key, int x, int y) {
         setMazeTexture(2);
     }
 
+    if (key == 'z') {        // Z: 이전 재질
+        g_currentWallMaterial--;
+        if (g_currentWallMaterial < 0)
+            g_currentWallMaterial = 2;  // 재질 개수 - 1
+        std::cout << "Wall material = " << g_currentWallMaterial << std::endl;
+    }
+    if (key == 'x') {        // X: 다음 재질
+        g_currentWallMaterial++;
+        if (g_currentWallMaterial > 2)
+            g_currentWallMaterial = 0;
+        std::cout << "Wall material = " << g_currentWallMaterial << std::endl;
+    }
+
 }
 
 void onKeyRelease(unsigned char key, int x, int y) {
